@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Created by PhpStorm.
- * User: Jiawei
- * Date: 2017/7/29
- * Time: 10:04
+ * Created by xjryanse.
+ * User: xjryanse
+ * Date: 2020/10/13
+ * Time: 10:13
  */
 
 namespace xjryanse\wechat;
