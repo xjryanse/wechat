@@ -31,7 +31,7 @@ class WechatWePubOauthAccessTokenService implements MainModelInterface
         $res = self::find( $con );
         if($res){
             $data['id'] = $res['id'];
-            return self::update($data);
+            return self::getInstance($data['id'])->update($data);
         } else {
             return self::save($data);
         }
