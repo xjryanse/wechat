@@ -27,7 +27,7 @@ abstract class Base
             throw new \Exception('appid和secret参数错误！');
         }
         //回调地址
-        $this->redirectUri = $redirectUri ? : Request::host().'/wechat/wx/authorize';
+        $this->redirectUri = $redirectUri ? : Request::host().'/wechat/we_pub/authorize';
     }
     /**
      * 设定AccessToken
