@@ -9,12 +9,13 @@
         }
     ],
     "require": {
-		"xjryanse/curl": "*"
-	},
-	"license": "MIT",
-	"autoload": {
-		"psr-4": {
-		  "xjryanse\\wechat\\": "src/"
-		}
-	}
+        "xjryanse/curl": "*",
+        "xjryanse/traits": "*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "xjryanse\\wechat\\": "src/"
+        }
+    }
 }
