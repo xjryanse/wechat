@@ -1,7 +1,7 @@
 <?php
-
 namespace xjryanse\wechat\WxPay\lib;
 
+use Exception;
 /**
  * 
  * 微信支付API异常类
