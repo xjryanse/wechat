@@ -1,7 +1,9 @@
 <?php
-
 namespace xjryanse\wechat\WxPay;
 
+use xjryanse\wechat\WxPay\lib\WxPayJsApiPay;
+use xjryanse\wechat\WxPay\lib\WxPayException;
+use xjryanse\wechat\WxPay\lib\WxPayConfigInterface;
 /**
  * 
  * JSAPI支付实现类
@@ -17,7 +19,7 @@ class JsApiTool {
 
     protected $config;
 
-    public function setConfig($config) {
+    public function setConfig( WxPayConfigInterface $config) {
         $this->config = $config;
     }
 
