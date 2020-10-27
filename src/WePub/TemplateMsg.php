@@ -14,7 +14,7 @@ class TemplateMsg
      * @param type $message 符合模板消息发送格式的数据
      * @return type
      */
-    public function send( $acid ,$message )
+    public function send( $acid ,$message ,$log = [])
     {
         $data       = is_string($message) ? json_decode(stripslashes($message),true) : $message ;
 
@@ -23,9 +23,9 @@ class TemplateMsg
         $url    = $this->wxUrl['CgiBin']->messageTemplateSend();        
         $res = Query::posturl($url, $data);
         //保存数据
-        $log                = Request::param();
         $log['message']     = is_string($message) ?  : json_encode( $message, JSON_UNESCAPED_UNICODE );
         $log['send_resp']   = json_encode( $res ,JSON_UNESCAPED_UNICODE);
-        return WechatWePubTemplateMsgLogService::save($log);
+        WechatWePubTemplateMsgLogService::save($log);
+        return $res;
     }
 }
