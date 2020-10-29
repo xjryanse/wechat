@@ -42,7 +42,7 @@ class BindUser
     public static function changeBind( $openid, $userId, $scene= "", $deleteIfEmpty = false)
     {
         $info = self::getBindUserId($openid, $scene);
-        if($info && $info['user_id'] == $userId){
+        if(!$info || ( $info && $info['user_id'] == $userId ) ){
             //相同用户不操作
             return false;
         }
