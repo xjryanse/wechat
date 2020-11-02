@@ -35,7 +35,7 @@ class TemplateMsg
      */
     public static function matchAll( $key,$openids, $url, $data, $replaceRule = [] )
     {
-        $con[] = ['company_id', '=' , session('scopeCompanyId')];
+        $con[] = ['company_id', '=' , session(SESSION_COMPANY_ID)];
         $con[] = ['template_key', '=' , $key ];
         $info  = WechatWePubTemplateMsgService::find( $con );
         //外部替换规则优先
