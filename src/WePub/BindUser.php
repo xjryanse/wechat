@@ -2,7 +2,9 @@
 namespace xjryanse\wechat\WePub;
 
 use xjryanse\wechat\service\WechatWePubFansUserService;
+use xjryanse\wechat\service\WechatWePubFansService;
 use xjryanse\user\service\UserService;
+use xjryanse\logic\Arrays;
 /*
  * 绑定用户逻辑类库
  */
@@ -23,7 +25,10 @@ class BindUser
         $info   = WechatWePubFansUserService::find( $con ); 
         if( !$info && $emptyCreate){
             //创建空用户
-            $userInfo = UserService::save([]);
+            $fansInfo = WechatWePubFansService::findByOpenid($openid);
+            //昵称头像存储
+            $userData = Arrays::getByKeys($fansInfo->toArray(), ['nickname','headimgurl']);
+            $userInfo = UserService::save( $userData );
             $data['openid']     = $openid;
             $data['scene']      = $scene;
             $data['user_id']    = $userInfo['id'];

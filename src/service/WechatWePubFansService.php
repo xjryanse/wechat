@@ -67,5 +67,13 @@ class WechatWePubFansService implements MainModelInterface
         $info = self::mainModel()->where($con)->find();
         return $info ? $info['acid'] : 0 ;
     }    
-    
+    /**
+     * 通过openid取单条数据
+     */
+    public static function findByOpenid( $openid )
+    {
+        $con[] = [ 'openid', '=', $openid ];
+        $info = self::mainModel()->where($con)->find();
+        return $info;
+    }
 }
