@@ -18,7 +18,7 @@ class BindUser
      * @param type $data        用户创建时写入的额外信息
      * @return type
      */
-    public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$data = [] )
+    public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$userData = [] )
     {
         $con    = [];
         $con[]  = ['openid','=',$openid];
