@@ -74,4 +74,38 @@ class BindUser
             $info = WechatWePubFansUserService::save( $data );
         }
     }
+    
+    /**
+     * 粉丝设定手机号码，返回用户id
+     * 适用于手机号码在用户表中唯一的场景
+     */
+    public static function fansSetPhoneGetUserId($openid, $userId, $phone )
+    {
+        //微信环境下，根据手机号码获取用户信息
+        $phoneUserInfo = UserService::getUserInfoByPhone( $phone );
+        //若手机号码取到了用户，且用户id一致直接返回。
+        if( $phoneUserInfo && $phoneUserInfo['id'] == $userId ){
+            return $userId;
+        }
+        //若手机号码取到了用户，且用户id不一致，改绑。
+        if( $phoneUserInfo && $phoneUserInfo['id'] != $userId ){
+            //绑定用户变更
+            self::changeBind( $openid , $phoneUserInfo['id'] );
+            return $phoneUserInfo['id'];
+        }
+        $userInfo = UserService::getInstance( $userId )->get();
+        //若手机号码未取到用户信息，且当前用户用户名为空，手机号码写入当前用户
+        if( !$phoneUserInfo && !$userInfo['username'] ){
+            //更新用户名和手机号码
+            UserService::getInstance( $userId )->update(['username'=>$phone,'phone'=>$phone]);
+            return $userId;
+        }
+        //若手机号码未取到用户信息，且当前用户名存在，新增用户，并改绑
+        if( !$phoneUserInfo && $userInfo['username'] ){
+            $res = UserService::save(['username'=>$phone,'phone'=>$phone]);
+            //绑定用户变更
+            self::changeBind( $openid, $res['id'] );
+            return $res['id'];
+        }
+    }
 }
