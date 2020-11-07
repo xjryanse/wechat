@@ -15,9 +15,10 @@ class BindUser
      * @param type $openid      openid
      * @param type $scene       场景值
      * @param type $emptyCreate 无用户是否创建
+     * @param type $data        用户创建时写入的额外信息
      * @return type
      */
-    public static function getBindUserId( $openid, $scene="", $emptyCreate = false  )
+    public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$data = [] )
     {
         $con    = [];
         $con[]  = ['openid','=',$openid];
