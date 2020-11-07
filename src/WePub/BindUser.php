@@ -18,7 +18,7 @@ class BindUser
      * @param type $data        用户创建时写入的额外信息
      * @return type
      */
-    public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$userData = [] )
+    public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$extraData = [] )
     {
         $con    = [];
         $con[]  = ['openid','=',$openid];
@@ -28,8 +28,9 @@ class BindUser
             //创建空用户
             $fansInfo = WechatWePubFansService::findByOpenid($openid);
             //昵称头像存储
-            $userData = Arrays::getByKeys($fansInfo->toArray(), ['nickname','headimgurl']);
-            $userInfo = UserService::save( $userData );
+            $userData   = Arrays::getByKeys($fansInfo->toArray(), ['nickname','headimgurl']);
+            $userData1  = array_merge( $userData, $extraData );
+            $userInfo = UserService::save( $userData1 );
             $data['openid']     = $openid;
             $data['scene']      = $scene;
             $data['user_id']    = $userInfo['id'];
