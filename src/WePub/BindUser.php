@@ -5,6 +5,7 @@ use xjryanse\wechat\service\WechatWePubFansUserService;
 use xjryanse\wechat\service\WechatWePubFansService;
 use xjryanse\user\service\UserService;
 use xjryanse\logic\Arrays;
+use xjryanse\system\logic\FileLogic;
 /*
  * 绑定用户逻辑类库
  */
@@ -15,7 +16,7 @@ class BindUser
      * @param type $openid      openid
      * @param type $scene       场景值
      * @param type $emptyCreate 无用户是否创建
-     * @param type $data        用户创建时写入的额外信息
+     * @param type $extraData   用户创建时写入的额外信息
      * @return type
      */
     public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$extraData = [] )
@@ -27,8 +28,12 @@ class BindUser
         if( !$info && $emptyCreate){
             //创建空用户
             $fansInfo = WechatWePubFansService::findByOpenid($openid);
+            //头像下载到本地服务器
+            $headImgInfo = FileLogic::saveUrlFile($fansInfo['headimgurl']);
             //昵称头像存储
-            $userData   = Arrays::getByKeys($fansInfo->toArray(), ['nickname','headimgurl']);
+            $userData   = Arrays::getByKeys($fansInfo->toArray(), ['nickname']);
+            //头像
+            $userData['headimg'] = $headImgInfo ? $headImgInfo['id'] : '';
             $userData1  = array_merge( $userData, $extraData );
             $userInfo = UserService::save( $userData1 );
             $data['openid']     = $openid;

@@ -10,7 +10,8 @@
     ],
     "require": {
         "xjryanse/curl": "*",
-        "xjryanse/traits": "*"
+        "xjryanse/traits": "*",
+        "xjryanse/system": "*"
     },
     "license": "MIT",
     "autoload": {
