@@ -70,7 +70,7 @@ class BindUser
             //新增绑定记录
             $data['openid']     = $openid;
             $data['scene']      = $scene;
-            $data['user_id']    = $userInfo['id'];
+            $data['user_id']    = $userId;
             return WechatWePubFansUserService::save( $data );
         }
     }
@@ -83,7 +83,7 @@ class BindUser
     {
         //微信环境下，根据手机号码获取用户信息
         $phoneUserInfo = UserService::getUserInfoByPhone( $phone );
-
+        
         //若手机号码取到了用户，且用户id一致直接返回。
         if( $phoneUserInfo && $phoneUserInfo['id'] == $userId ){
             return $userId;
