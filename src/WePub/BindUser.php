@@ -79,7 +79,7 @@ class BindUser
      * 粉丝设定手机号码，返回用户id
      * 适用于手机号码在用户表中唯一的场景
      */
-    public static function fansSetPhoneGetUserId($openid, $userId, $phone )
+    public static function fansSetPhoneGetUserId($openid, $userId, $phone ,$scene="" )
     {
         //微信环境下，根据手机号码获取用户信息
         $phoneUserInfo = UserService::getUserInfoByPhone( $phone );
@@ -91,7 +91,7 @@ class BindUser
         //若手机号码取到了用户，且用户id不一致，改绑。
         if( $phoneUserInfo && $phoneUserInfo['id'] != $userId ){
             //绑定用户变更
-            self::changeBind( $openid , $phoneUserInfo['id'] );
+            self::changeBind( $openid , $phoneUserInfo['id'] ,$scene, true);
             return $phoneUserInfo['id'];
         }
         $userInfo = UserService::getInstance( $userId )->get();
@@ -105,7 +105,7 @@ class BindUser
         if( !$phoneUserInfo && $userInfo['username'] ){
             $res = UserService::save(['username'=>$phone,'phone'=>$phone]);
             //绑定用户变更
-            self::changeBind( $openid, $res['id'] );
+            self::changeBind( $openid, $res['id'], $scene, true );
             return $res['id'];
         }
     }
