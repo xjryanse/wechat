@@ -48,15 +48,15 @@ class BindUser
      */
     public static function changeBind( $openid, $userId, $scene= "", $deleteIfEmpty = false)
     {
-        $info = self::getBindUserId($openid, $scene);
-        if(!$info || ( $info && $info['user_id'] == $userId ) ){
+        $bindUserId = self::getBindUserId($openid, $scene);
+        if(!$bindUserId || $bindUserId == $userId ){
             //相同用户不操作
             return false;
         }
-        $userInfo = UserService::getInstance($info['user_id'])->get();
+        $userInfo = UserService::getInstance($bindUserId)->get();
         //如果为空,且强制删用户，则删
-        if($info && $deleteIfEmpty && !$userInfo['username']){
-            UserService::getInstance($info['user_id'])->delete();
+        if( $bindUserId && $deleteIfEmpty && !$userInfo['username']){
+            UserService::getInstance( $bindUserId )->delete();
         }
         //绑定信息
         $con    = [];
@@ -71,7 +71,7 @@ class BindUser
             $data['openid']     = $openid;
             $data['scene']      = $scene;
             $data['user_id']    = $userInfo['id'];
-            $info = WechatWePubFansUserService::save( $data );
+            return WechatWePubFansUserService::save( $data );
         }
     }
     
@@ -83,6 +83,7 @@ class BindUser
     {
         //微信环境下，根据手机号码获取用户信息
         $phoneUserInfo = UserService::getUserInfoByPhone( $phone );
+
         //若手机号码取到了用户，且用户id一致直接返回。
         if( $phoneUserInfo && $phoneUserInfo['id'] == $userId ){
             return $userId;
