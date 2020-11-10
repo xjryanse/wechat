@@ -87,6 +87,7 @@ class Fans
     public function userGet( $nextOpenid = "")
     {
         $url = $this->wxUrl['CgiBin']->userGet( $nextOpenid = "" );
+        dump($url);
         $data = Query::geturl( $url );
         //一般是出错的情况
         if(!isset($data['data']['openid'])){

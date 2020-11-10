@@ -43,14 +43,14 @@ abstract class Base
      */
     protected function replace($url='')
     {
-        $url = str_replace( "APPID",        $this->appId,       $url);
-        $url = str_replace( "SECRET",       $this->appSecret,   $url);
-        $url = str_replace( "ACCESS_TOKEN", $this->accessToken, $url);
-        $url = str_replace( "REDIRECT_URI", $this->redirectUri, $url);
-        $url = str_replace( "SCOPE",        $this->scope,       $url);
-        $url = str_replace( "CODE",         $this->code,        $url);       
-        $url = str_replace( "OPENID",       $this->openid,      $url);        
-        $url = str_replace( "STATE",        $this->state,       $url);
+        $url = str_replace( "=APPID",        '='.$this->appId,       $url);
+        $url = str_replace( "=SECRET",       '='.$this->appSecret,   $url);
+        $url = str_replace( "=ACCESS_TOKEN", '='.$this->accessToken, $url);
+        $url = str_replace( "=REDIRECT_URI", '='.$this->redirectUri, $url);
+        $url = str_replace( "=SCOPE",        '='.$this->scope,       $url);
+        $url = str_replace( "=CODE",         '='.$this->code,        $url);       
+        $url = str_replace( "=OPENID",       '='.$this->openid,      $url);        
+        $url = str_replace( "=STATE",        '='.$this->state,       $url);
         
         return $url;
     }

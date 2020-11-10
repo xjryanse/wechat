@@ -20,4 +20,13 @@ class CgiBin extends Base
         $class = (new \ReflectionClass( __CLASS__ ))->getShortName();
         return $this->getMyUrl($class, __FUNCTION__);
     }
+    
+    //批量拉取用户
+    public function userGet( $nextOpenid = "" )
+    {
+        $class = (new \ReflectionClass( __CLASS__ ))->getShortName();
+        $myUrl = $this->getMyUrl($class, __FUNCTION__ );
+        $url = str_replace( "=NEXT_OPENID",        '='.$nextOpenid,       $myUrl);
+        return $url;
+    }
 }
