@@ -15,25 +15,13 @@ class WechatWxPayLogService implements MainModelInterface
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWxPayLog';
 
     /**
-     * 拆解返回数据保存
+     * 拆解val数据保存
      */
-    public static function tearData()
+    public function tearValData()
     {
-        $con[]  = ['appid','=',''];
-        $list   = self::lists( $con );
-        foreach( $list as &$v){
-            $data       = json_decode($v['val'], true);
-            $data['id'] = $v['id'];
-            self::getInstance( $data['id'] )->update( $data );
-//            $this->async( $v['id'] );
-        }
+        $info = $this->get();
+        //val转数组
+        $data       = json_decode($info['val'], true);
+        return $this->update($data);
     }
-    /**
-     * 处理订单财务数据
-     */
-    private function dealOrder()
-    {
-        
-    }
-
 }
