@@ -38,7 +38,7 @@ class DealOrder
     public static function dealOrderFinance( $wxPayLogId )
     {
         //无缓存拿数据
-        $info       = self::getInstance( $wxPayLogId )->get(0); 
+        $info       = WechatWxPayLogService::getInstance( $wxPayLogId )->get(0); 
         if(!$info){
             throw new Exception( '未找到微信支付记录信息'. $wxPayLogId );
         }
