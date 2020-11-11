@@ -2,7 +2,6 @@
 namespace xjryanse\wechat\WxPay;
 
 use xjryanse\wechat\service\WechatWxPayLogService;
-use xjryanse\finance\service\FinanceIncomeService;
 use xjryanse\finance\service\FinanceIncomePayService;
 use xjryanse\finance\logic\FinanceIncomeLogic;
 use xjryanse\finance\logic\FinanceIncomePayLogic;
@@ -22,10 +21,10 @@ class DealOrder
         $con[]  = ['appid','=',''];
         $list   = WechatWxPayLogService::lists( $con );
         foreach( $list as &$v){
-            //不开事务无法执行财务数据处理
-            Db::startTrans();
             //拆解数据保存
             WechatWxPayLogService::getInstance( $v['id'] )->tearValData();
+            //不开事务无法执行财务数据处理
+            Db::startTrans();
             //处理订单财务数据
             self::dealOrderFinance( $v['id'] );
             Db::commit();
@@ -49,6 +48,7 @@ class DealOrder
         FinanceIncomePayLogic::afterPayDoIncome($financeIncomePay['id']);
         //收款单更新为已收款，且收款金额写入订单；
         FinanceIncomeLogic::afterPayDoIncome($financeIncomePay['id']);
+        //收款金额写入订单
         return true;
     }
     
