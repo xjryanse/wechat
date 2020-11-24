@@ -7,5 +7,9 @@ namespace xjryanse\wechat\model;
 class WechatWePubTemplateMsg extends Base
 {
 
+    public function getReplaceRuleAttr($value)
+    {
+        return $value ? json_decode($value,true) : [];
+    }
 
 }
