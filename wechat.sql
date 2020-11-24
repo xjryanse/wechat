@@ -271,7 +271,7 @@ CREATE TABLE `w_wechat_we_pub_template_msg`  (
   `template_key` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '模板使用key\r\n拼车通知管理：pinOrderNoticeAdmin',
   `template_id` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `template_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `param_bind` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '参数绑定',
+  `replace_rule` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '参数绑定',
   `describe` int(11) NULL DEFAULT NULL COMMENT '使用说明',
   `sort` int(11) NULL DEFAULT 1000 COMMENT '排序',
   `status` tinyint(1) NULL DEFAULT 1 COMMENT '状态(0禁用,1启用)',
