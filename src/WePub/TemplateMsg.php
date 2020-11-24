@@ -39,7 +39,7 @@ class TemplateMsg
         $con[] = ['template_key', '=' , $key ];
         $info  = WechatWePubTemplateMsgService::find( $con );
         //外部替换规则优先
-        $rule  = $replaceRule ? : json_decode( $info['match'],true);
+        $rule  = $replaceRule ? : $info['replace_rule'];
         $messages = [];
         foreach($openids as $openid){
             if(!$openid){
