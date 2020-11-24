@@ -4,6 +4,7 @@ namespace xjryanse\wechat\WxPay;
 use xjryanse\wechat\WxPay\lib\WxPayUnifiedOrder;
 use xjryanse\wechat\WxPay\lib\WxPayConfigInterface;
 use xjryanse\wechat\WxPay\lib\WxPayApi;
+use xjryanse\wechat\WxPay\lib\WxPayRefund;
 /*
  * 微信JsApi支付配置信息
  */

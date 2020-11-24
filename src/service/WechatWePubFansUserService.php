@@ -14,4 +14,12 @@ class WechatWePubFansUserService implements MainModelInterface
     protected static $mainModel;
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWePubFansUser';
 
+    /*
+     * 根据user_id,取绑定的openid列表
+     */
+    public static function columnOpenidByUserId( $userId )
+    {
+        $con[] = [ 'user_id','=',$userId ];
+        return self::column( 'openid', $con );
+    }
 }

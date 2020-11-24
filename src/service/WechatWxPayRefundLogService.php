@@ -13,4 +13,6 @@ class WechatWxPayRefundLogService implements MainModelInterface
 
     protected static $mainModel;
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWxPayRefundLog';
+    
+    
 }
