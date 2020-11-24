@@ -13,5 +13,14 @@ class WechatWePubTemplateMsgService implements MainModelInterface
 
     protected static $mainModel;
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWePubTemplateMsg';
-
+    /**
+     * 根据模板key取信息
+     * @param type $templateKey
+     * @return type
+     */
+    public static function getByTemplateKey( $templateKey )
+    {
+        $con[] = ['template_key','=',$templateKey];
+        return self::find( $con );
+    }
 }
