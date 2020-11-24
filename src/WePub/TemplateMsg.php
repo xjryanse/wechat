@@ -8,9 +8,23 @@ use xjryanse\wechat\service\WechatWePubTemplateMsgService;
 class TemplateMsg
 {
     use \xjryanse\traits\WePubAuthTrait;
+    /**
+     * 【批量】执行发送操作
+     * @param type $acid        公众号id
+     * @param type $messages    已经打包好的模板消息串
+     */
+    public static function doSend( $acid,$messages)
+    {
+        $TemplateMsg    = new self();
+        //循环发送消息
+        foreach( $messages as $message){
+            $TemplateMsg->send( $acid, $message);               
+        }
+        return $messages;
+    }
     
     /**
-     * 模板消息发送
+     * 【单条】模板消息发送
      * @param type $acid    公众号acid
      * @param type $message 符合模板消息发送格式的数据
      * @return type
