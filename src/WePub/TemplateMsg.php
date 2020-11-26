@@ -49,7 +49,7 @@ class TemplateMsg
      */
     public static function matchAll( $key,$openids, $url, $data, $replaceRule = [] )
     {
-        $con[] = ['company_id', '=' , session(SESSION_COMPANY_ID)];
+        $con[] = ['company_id', '=' , isset($data['company_id']) ? $data['company_id'] : session(SESSION_COMPANY_ID)];
         $con[] = ['template_key', '=' , $key ];
         $info  = WechatWePubTemplateMsgService::find( $con );
         //外部替换规则优先
@@ -83,8 +83,8 @@ class TemplateMsg
         $sendData['template_id']    = $templateId;
         $sendData['url']            = $url;
         foreach( $replaceRule as $k=>$v) {
-            //商品描述
-            $sendData['data'][ $k ]['value']  = $data[$v['value']];
+            //字段存在，则取字段，否则，取原样
+            $sendData['data'][ $k ]['value']  = isset($data[$v['value']]) ? $data[$v['value']] : $v['value'] ;
             $sendData['data'][ $k ]['color']  = $v['color'];
         }
 
