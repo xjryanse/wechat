@@ -52,6 +52,9 @@ class TemplateMsg
         $con[] = ['company_id', '=' , isset($data['company_id']) ? $data['company_id'] : session(SESSION_COMPANY_ID)];
         $con[] = ['template_key', '=' , $key ];
         $info  = WechatWePubTemplateMsgService::find( $con );
+        if(!$info['template_id']){
+            return false;
+        }
         //外部替换规则优先
         $rule  = $replaceRule ? : $info['replace_rule'];
         $messages = [];
@@ -78,16 +81,16 @@ class TemplateMsg
      */
     public static function matchOne( $templateId, $openid, $url, $data, $replaceRule  )
     {
-//        dump($data);
         $sendData['touser']         = $openid;
         $sendData['template_id']    = $templateId;
         $sendData['url']            = $url;
-        foreach( $replaceRule as $k=>$v) {
-            //字段存在，则取字段，否则，取原样
-            $sendData['data'][ $k ]['value']  = isset($data[$v['value']]) ? $data[$v['value']] : $v['value'] ;
-            $sendData['data'][ $k ]['color']  = $v['color'];
+        if(is_array($replaceRule)){
+            foreach( $replaceRule as $k=>$v) {
+                //字段存在，则取字段，否则，取原样
+                $sendData['data'][ $k ]['value']  = isset($data[$v['value']]) ? $data[$v['value']] : $v['value'] ;
+                $sendData['data'][ $k ]['color']  = $v['color'];
+            }
         }
-
         return $sendData;
     }
 }
