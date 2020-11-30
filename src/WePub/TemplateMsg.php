@@ -17,8 +17,10 @@ class TemplateMsg
     {
         $TemplateMsg    = new self();
         //循环发送消息
-        foreach( $messages as $message){
-            $TemplateMsg->send( $acid, $message);               
+        if(is_array($messages)){
+            foreach( $messages as $message ){
+                $TemplateMsg->send( $acid, $message );
+            }
         }
         return $messages;
     }
