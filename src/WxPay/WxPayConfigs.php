@@ -134,7 +134,13 @@ class WxPayConfigs extends WxPayConfigInterface
     public function GetSSLCertPath(&$sslCertPath, &$sslKeyPath)
     {
         $info           = $this->getInfo();
-        $sslCertPath    = $info ? $info["SSLCertParth"] : '/www/mch/'.$this->GetMerchantId().'_apiclient_cert.pem'  ;
-        $sslKeyPath     = $info ? $info["SSLKeyParth"]  : '/www/mch/'.$this->GetMerchantId().'_apiclient_key.pem'   ;
+        //优先拿配置路径，再拿默认路径
+        $sslCertPath    = $info && $info["SSLCertParth"]    
+                ? $info["SSLCertParth"] 
+                : '/www/mch/'.$this->GetMerchantId().'_apiclient_cert.pem'  ;
+        //优先拿配置路径，再拿默认路径
+        $sslKeyPath     = $info && $info["SSLKeyParth"]     
+                ? $info["SSLKeyParth"]  
+                : '/www/mch/'.$this->GetMerchantId().'_apiclient_key.pem'   ;
     }
 }

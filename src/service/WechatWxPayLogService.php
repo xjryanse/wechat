@@ -24,4 +24,12 @@ class WechatWxPayLogService implements MainModelInterface
         $data       = json_decode($info['val'], true);
         return $this->update($data);
     }
+    /**
+     * 根据商户单号获取支付信息
+     */
+    public static function getByOutTradeNo( $paySn ,$con = [])
+    {
+        $con[] = [ 'out_trade_no','=',$paySn ];
+        return self::find( $con );
+    }
 }
