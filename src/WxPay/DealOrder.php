@@ -6,6 +6,7 @@ use xjryanse\finance\logic\FinanceIncomeLogic;
 use xjryanse\finance\logic\FinanceIncomePayLogic;
 use xjryanse\wechat\service\WechatWxPayLogService;
 use xjryanse\wechat\service\WechatWxPayRefundLogService;
+use xjryanse\finance\logic\UserPayLogic;
 use think\Db;
 use Exception;
 /*
@@ -49,12 +50,8 @@ class DealOrder
         if(!$financeIncomePay){
             throw new Exception( '未找到'. $arrayData['out_trade_no'] .'对应支付单信息' );
         }
-        //支付单更新为已收款
-        FinanceIncomePayLogic::afterPayDoIncome($financeIncomePay['id']);
-        //收款单更新为已收款，且收款金额写入订单；
-        FinanceIncomeLogic::afterPayDoIncome($financeIncomePay['id']);
-        //返回支付单id
-        return $financeIncomePay['id'];
+        return UserPayLogic::afterPay($financeIncomePay['id']);
+
     }
     /**
      * 处理退款的财务入账逻辑
