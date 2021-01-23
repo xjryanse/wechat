@@ -77,7 +77,7 @@ class Fans
             $res['url']     = $userInfoUrl;
             $res['token']   = $this->token;
             $res['acid']    = $this->acid;
-            $fansInfo       = WechatWePubFansService::save($res);        
+            $fansInfo       = WechatWePubFansService::save($res);
         }
         return $fansInfo;
     }
