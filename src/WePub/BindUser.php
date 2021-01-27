@@ -24,7 +24,7 @@ class BindUser
         $con    = [];
         $con[]  = ['openid','=',$openid];
         $con[]  = ['scene','=',$scene];
-        $info   = WechatWePubFansUserService::find( $con ); 
+        $info   = WechatWePubFansUserService::find( $con ,0);   //无缓存查数据 
         if( !$info && $emptyCreate){
             //创建空用户
             $fansInfo = WechatWePubFansService::findByOpenid($openid);
@@ -33,7 +33,8 @@ class BindUser
             //昵称头像存储
             $userData   = Arrays::getByKeys($fansInfo->toArray(), ['nickname']);
             //头像
-            $userData['headimg'] = $headImgInfo ? $headImgInfo['id'] : '';
+            $userData['headimg']    = $headImgInfo ? $headImgInfo['id'] : '';
+            $userData['username']   = $openid;      //用openid作临时用户名
             $userData1  = array_merge( $userData, $extraData );
             $userInfo = UserService::save( $userData1 );
             $data['openid']     = $openid;
