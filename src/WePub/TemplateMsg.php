@@ -2,7 +2,6 @@
 namespace xjryanse\wechat\WePub;
 
 use xjryanse\curl\Query;
-use xjryanse\wechat\service\WechatWePubTemplateMsgLogService;
 use xjryanse\wechat\service\WechatWePubTemplateMsgService;
 
 class TemplateMsg
@@ -31,7 +30,7 @@ class TemplateMsg
      * @param type $message 符合模板消息发送格式的数据
      * @return type
      */
-    public function send( $acid ,$message ,$log = [])
+    public function send( $acid ,$message )
     {
         $data       = is_string($message) ? json_decode(stripslashes($message),true) : $message ;
 
@@ -39,10 +38,10 @@ class TemplateMsg
         $this->initWePubAccount( $acid );
         $url    = $this->wxUrl['CgiBin']->messageTemplateSend();        
         $res = Query::posturl($url, $data);
-        //保存数据
-        $log['message']     = is_string($message) ?  : json_encode( $message, JSON_UNESCAPED_UNICODE );
-        $log['send_resp']   = json_encode( $res ,JSON_UNESCAPED_UNICODE);
-        WechatWePubTemplateMsgLogService::save($log);
+        //保存数据[使用异步]
+//        $log['message']     = is_string($message) ?  : json_encode( $message, JSON_UNESCAPED_UNICODE );
+//        $log['send_resp']   = json_encode( $res ,JSON_UNESCAPED_UNICODE);
+//        WechatWePubTemplateMsgLogService::save($log);
         return $res;
     }
 
