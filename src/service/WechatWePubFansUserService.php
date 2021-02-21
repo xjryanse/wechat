@@ -35,7 +35,22 @@ class WechatWePubFansUserService implements MainModelInterface
             $con[] = ['scene','=',$scene ];
         }
         $info = self::find( $con );
-            
         return $info ? $info['user_id'] : '';
+    }
+    /**
+     * 公司id
+     * @param type $openid
+     * @param type $scene
+     * @return type
+     */
+    public static function getCompanyIdByOpenid( $openid,$scene = '' )
+    {
+        $con[] = ['openid','=',$openid ];
+        if( $scene ){
+            $con[] = ['scene','=',$scene ];
+        }
+        $info = self::find( $con );
+            
+        return $info ? $info['company_id'] : '';        
     }
 }
