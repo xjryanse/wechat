@@ -101,8 +101,8 @@ class BindUser
             return $phoneUserInfo['id'];
         }
         $userInfo = UserService::getInstance( $userId )->get();
-        //若手机号码未取到用户信息，且当前用户用户名为空，手机号码写入当前用户
-        if( !$phoneUserInfo && !$userInfo['username'] ){
+        //若手机号码未取到用户信息，且当前用户手机号码为空，手机号码写入当前用户
+        if( !$phoneUserInfo && !$userInfo['phone'] ){
             //更新用户名和手机号码
             UserService::getInstance( $userId )->update(['username'=>$phone,'phone'=>$phone]);
             return $userId;

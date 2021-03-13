@@ -10,6 +10,7 @@ use xjryanse\wechat\WePub\wxurl\Connect;
 use xjryanse\wechat\WePub\wxurl\Datacube;
 use xjryanse\wechat\WePub\wxurl\Sns;
 use xjryanse\curl\Query;
+use xjryanse\logic\Debug;
 use think\facade\Request;
 use think\facade\Cache;
 use Exception;
@@ -87,7 +88,7 @@ class Fans
     public function userGet( $nextOpenid = "")
     {
         $url = $this->wxUrl['CgiBin']->userGet( $nextOpenid = "" );
-        dump($url);
+        Debug::debug('Fans userGet() url',$url);
         $data = Query::geturl( $url );
         //一般是出错的情况
         if(!isset($data['data']['openid'])){
@@ -118,6 +119,7 @@ class Fans
     {
         $userInfoUrl    = $this->wxUrl['CgiBin']->userInfoBatchget();
         $res            = Query::posturl($userInfoUrl,$data);
+        Debug::debug('Fans cgiBinUserInfoBatchget() res',$res);        
         if(isset( $res['user_info_list'])){
             foreach( $res['user_info_list'] as &$v){
                 //循环存入数据库
