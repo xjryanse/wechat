@@ -1,6 +1,7 @@
 <?php
 namespace xjryanse\wechat\WePub\wxurl;
 
+use xjryanse\logic\Debug;
 use think\facade\Request;
 
 abstract class Base
@@ -62,6 +63,8 @@ abstract class Base
     protected function getMyUrl( $class, $method )
     {
         $name   = lcfirst( $class ). ucfirst( $method );
+        Debug::debug('Base getMyUrl() $name',$name);
+        Debug::debug('Base getMyUrl() $urlTpl',BaseUrlTpl::$urlTpl);
         $url    = BaseUrlTpl::$urlTpl[$name];
         return $this->replace( $url );
     }

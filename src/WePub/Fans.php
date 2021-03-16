@@ -9,10 +9,11 @@ use xjryanse\wechat\WePub\wxurl\CgiBin;
 use xjryanse\wechat\WePub\wxurl\Connect;
 use xjryanse\wechat\WePub\wxurl\Datacube;
 use xjryanse\wechat\WePub\wxurl\Sns;
+use xjryanse\wechat\WePub\wxurl\Card;
 use xjryanse\curl\Query;
-use xjryanse\logic\Debug;
 use think\facade\Request;
 use think\facade\Cache;
+use xjryanse\logic\Debug;
 use Exception;
 
 class Fans
@@ -40,6 +41,7 @@ class Fans
         $this->wxUrl['Connect']     = new Connect( $this->appId, $this->appSecret,$this->accessToken );
         $this->wxUrl['Datacube']    = new Datacube( $this->appId, $this->appSecret,$this->accessToken );
         $this->wxUrl['Sns']         = new Sns( $this->appId, $this->appSecret,$this->accessToken );
+        $this->wxUrl['Card']         = new Card( $this->appId, $this->appSecret,$this->accessToken );
         
         $this->getOauthAccessToken();
         $this->getAccessToken();
@@ -87,7 +89,7 @@ class Fans
      */
     public function userGet( $nextOpenid = "")
     {
-        $url = $this->wxUrl['CgiBin']->userGet( $nextOpenid = "" );
+        $url = $this->wxUrl['CgiBin']->userGet( $nextOpenid);
         Debug::debug('Fans userGet() url',$url);
         $data = Query::geturl( $url );
         //一般是出错的情况
@@ -119,7 +121,6 @@ class Fans
     {
         $userInfoUrl    = $this->wxUrl['CgiBin']->userInfoBatchget();
         $res            = Query::posturl($userInfoUrl,$data);
-        Debug::debug('Fans cgiBinUserInfoBatchget() res',$res);        
         if(isset( $res['user_info_list'])){
             foreach( $res['user_info_list'] as &$v){
                 //循环存入数据库
@@ -159,6 +160,7 @@ class Fans
         $this->wxUrl['Connect'] ->setAccessToken( $accessToken['access_token'] );
         $this->wxUrl['Datacube']->setAccessToken( $accessToken['access_token'] );
         $this->wxUrl['Sns']     ->setAccessToken( $accessToken['access_token'] );
+        $this->wxUrl['Card']     ->setAccessToken( $accessToken['access_token'] );
     }
     /**
      * 获取公众号accesstoken
@@ -231,5 +233,21 @@ class Fans
     private static function getJsapiTicketFromDb( $acid )
     {
         return WechatWePubJsapiTicketService::mainModel()->where('acid',$acid)->order('id desc')->find();
+    }
+
+
+    /**
+     * 批量查询卡券列表
+     * @param type $data    
+     * @return type
+     */
+    public function cardBatchget( $data  )
+    {
+        $userInfoUrl    = $this->wxUrl['Card']->batchget();
+        Debug::debug('Fans cardBatchget() url',$userInfoUrl);
+        $res            = Query::posturl($userInfoUrl,$data);
+        Debug::debug('Fans cardBatchget() res',$res);        
+        
+        return $res;
     }
 }

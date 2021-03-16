@@ -58,5 +58,8 @@ class BaseUrlTpl
         'datacubeGetusersummary'            =>'https://api.weixin.qq.com/datacube/getusersummary?access_token=ACCESS_TOKEN',
         //获取累计用户数据              getusercumulate
         'datacubeGetusercumulate'           =>'https://api.weixin.qq.com/datacube/getusercumulate?access_token=ACCESS_TOKEN',
+
+        //批量查询卡券列表              cardBatchget
+        'cardBatchget'                      =>'https://api.weixin.qq.com/card/batchget?access_token=ACCESS_TOKEN',
     ];
 }
