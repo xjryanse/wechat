@@ -2,7 +2,7 @@
 namespace xjryanse\wechat\service;
 
 use xjryanse\system\interfaces\MainModelInterface;
-
+use xjryanse\logic\Arrays;
 /**
  * 微信公众号粉丝
  */
@@ -14,6 +14,16 @@ class WechatWePubFansService implements MainModelInterface
     protected static $mainModel;
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWePubFans';
 
+    public function extraPreDelete(){
+        self::checkTransaction();
+        $userInfo   = self::getInstance( $this->uuid )->get();
+        $con[]      = ['openid','=',Arrays::value( $userInfo , 'openid')];
+        $lists = WechatWePubFansUserService::lists( $con );
+        foreach( $lists as $fansUser){
+            WechatWePubFansUserService::getInstance( $fansUser['id'] )->delete();
+        }
+    }    
+    
     public static function addOpenid( $openid ,$acid )
     {
         if(!$openid){
