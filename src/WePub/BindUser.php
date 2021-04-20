@@ -67,8 +67,10 @@ class BindUser
         }
         $userInfo = UserService::getInstance($bindUserId)->get();
         //如果为空,且强制删用户，则删
-        if( $bindUserId && $deleteIfEmpty && !$userInfo['username']){
-            UserService::getInstance( $bindUserId )->delete();
+        //删空用户，或以openid为用户名的用户
+        if( $bindUserId && $deleteIfEmpty && (!$userInfo['username'] || $userInfo['username'] == $openid)){
+            //没用了，直接强删
+            UserService::mainModel()->where(['id'=>$bindUserId])->delete();
         }
         //绑定信息
         $con    = [];
