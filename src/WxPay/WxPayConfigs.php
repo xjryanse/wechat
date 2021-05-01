@@ -18,7 +18,7 @@ class WxPayConfigs extends WxPayConfigInterface
      * 获取配置项信息（存于数据库）
      * @return type
      */
-    protected function getInfo()
+    public function getInfo()
     {
         if( $this->info ){
             return $this->info;
@@ -51,7 +51,6 @@ class WxPayConfigs extends WxPayConfigInterface
     {
         $info = $this->getInfo();
         return $info ? $info['MerchantId'] : '';
-        return '1579507281';
     }
 
     //=======【支付相关配置：支付成功回调地址/签名方式】===================================
