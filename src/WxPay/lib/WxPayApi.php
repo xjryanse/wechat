@@ -2,6 +2,7 @@
 
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\logic\Debug;
 /**
  * 
  * 接口访问类，包含所有微信支付API列表的封装，类中方法为static方法，
@@ -569,6 +570,8 @@ class WxPayApi {
             curl_setopt($ch, CURLOPT_SSLCERT, $sslCertPath);
             curl_setopt($ch, CURLOPT_SSLKEYTYPE, 'PEM');
             curl_setopt($ch, CURLOPT_SSLKEY, $sslKeyPath);
+            Debug::debug('$sslCertPath',$sslCertPath);
+            Debug::debug('$sslKeyPath',$sslKeyPath);
         }
         //post提交方式
         curl_setopt($ch, CURLOPT_POST, TRUE);
