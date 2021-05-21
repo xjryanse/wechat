@@ -8,6 +8,7 @@ use xjryanse\finance\service\FinanceStatementService;
 use xjryanse\system\interfaces\MainModelInterface;
 use xjryanse\wechat\model\WechatWxPayLog;
 use xjryanse\logic\Arrays;
+use xjryanse\logic\Debug;
 use think\Db;
 /**
  * 微信支付记录
@@ -27,14 +28,16 @@ class WechatWxPayLogService implements MainModelInterface {
         $info = $this->get();
         //val转数组
         $data = json_decode($info['val'], true);
-        $data['statement_id'] = Arrays::value(json_decode($data['attach'], true),'statement_id');
+        Debug::debug('拆解数据',$data);
+        $data['statement_id']   = Arrays::value(json_decode($data['attach'], true),'statement_id');
+        $data['company_id']     = FinanceStatementService::getInstance( $data['statement_id'] )->fCompanyId();
         return $this->update($data);
     }
 
     public static function extraAfterUpdate(&$data, $uuid) {
         $result     = Arrays::value($data, 'result_code');
         //状态S-交易成功；F-交易失败；A-等待授权；Z-交易未知；D-订单已撤销
-        $info = self::getInstance( $uuid )->get();
+        $info = self::getInstance( $uuid )->get(0);
         if( $result == 'SUCCESS' && !FinanceAccountLogService::statementHasLog( $info['statement_id'] ) ){
             Db::startTrans();
             self::addFinanceAccountLog( $info );
@@ -47,11 +50,12 @@ class WechatWxPayLogService implements MainModelInterface {
      */
     public static function addFinanceAccountLog(WechatWxPayLog $log)
     {
+        Debug::debug('addFinanceAccountLog::输入信息',$log);
         $statementId            = $log['statement_id'];
         $statement              = FinanceStatementService::getInstance( $statementId )->get();
 
         $data['company_id']     = $log['company_id'];
-        $data['user_id']        = $log['user_id'];
+        $data['user_id']        = Arrays::value($statement, 'user_id');
         $data['customer_id']    = Arrays::value($statement, 'customer_id');
         $data['money']          = Arrays::value($statement, 'need_pay_prize');
         $data['statement_id']   = $log['statement_id'];
@@ -60,6 +64,7 @@ class WechatWxPayLogService implements MainModelInterface {
         $data['account_id']     = FinanceAccountService::getIdByAccountType($log['company_id'], 'wxMch');      //微信商户号
         $data['from_table']     = self::mainModel()->getTable();
         $data['from_table_id']  = $log['id'];
+        Debug::debug('addFinanceAccountLog::保存信息',$data);
         return FinanceAccountLogService::save($data);
     }
     /**

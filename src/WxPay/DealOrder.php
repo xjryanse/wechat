@@ -46,7 +46,8 @@ class DealOrder
         }
         $arrayData  = json_decode( $info['val'], true );
         //获取支付单id
-        $financeIncomePay = FinanceIncomePayService::getBySn($arrayData['out_trade_no']);
+        $con[] = ['income_id','=',$info['statement_id']];
+        $financeIncomePay = FinanceIncomePayService::mainModel()->where($con)->order('id desc')->find();
         if(!$financeIncomePay){
             throw new Exception( '未找到'. $arrayData['out_trade_no'] .'对应支付单信息' );
         }
