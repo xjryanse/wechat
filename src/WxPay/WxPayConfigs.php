@@ -2,7 +2,8 @@
 namespace xjryanse\wechat\WxPay;
 
 use xjryanse\wechat\service\WechatWxPayConfigService;
-use xjryanse\wechat\WxPay\lib\WxPayConfigInterface;
+use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
+
 /*
  * 微信支付配置信息
  */

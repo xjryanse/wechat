@@ -168,20 +168,26 @@ class Fans
      */
     public function getJsapiTicket()
     {
-        $jsapiTicket = $this->getJsapiTicketFromDb( $this->acid);
-        if(!$jsapiTicket  || strtotime($jsapiTicket['expires_time']) < time()){
+        $key = 'JSAPI_TICKET_'.$this->acid;
+        $jsapiTicket = Cache::get($key);
+        // $jsapiTicket = $this->getJsapiTicketFromDb( $this->acid);
+        if(!$jsapiTicket  || $jsapiTicket['expires_time'] < time()){
             //从微信服务器获取accessToken
             $jsapiTicketUrl = $this->wxUrl['CgiBin']->ticketGetticket( $this->accessToken );
             $res            = Query::geturl( $jsapiTicketUrl);
             $res['acid']    = $this->acid;
-            $jsapiTicket    = WechatWePubJsapiTicketService::save($res);
+            $res['expires_time'] = time() + $res['expires_in'];
+            
+            Cache::set($key,$res);
+            $jsapiTicket = $res;
+            // $jsapiTicket    = WechatWePubJsapiTicketService::save($res);
         }
         return $jsapiTicket['ticket'];
     }
     /**
      * 获取微信分享jssdk参数
      */
-    public function getWxJsSdkParams()
+    public function getWxJsSdkParams( $url )
     {
         $ticket = $this->getJsapiTicket();
         $timestamp  = time();
@@ -189,7 +195,7 @@ class Fans
         $str = 'jsapi_ticket='. $ticket
                 .'&noncestr='. $noncestr
                 .'&timestamp='.$timestamp
-                .'&url='.Request::url(true);
+                .'&url='.$url;
         $signature  = sha1($str);
         
         $data['wxAppId']        = $this->appId;
@@ -232,7 +238,7 @@ class Fans
      */
     private static function getJsapiTicketFromDb( $acid )
     {
-        return WechatWePubJsapiTicketService::mainModel()->where('acid',$acid)->order('id desc')->find();
+        return WechatWePubJsapiTicketService::mainModel()->where('acid',$acid)->order('id desc')->cache(7000)->find();
     }
 
 

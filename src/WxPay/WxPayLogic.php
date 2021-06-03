@@ -3,6 +3,8 @@ namespace xjryanse\wechat\WxPay;
 
 use xjryanse\wechat\WxPay\WxPayConfigs;
 use xjryanse\wechat\WxPay\JsApiPay;
+use xjryanse\wechat\WxPay\lib\WxPayApi;
+use xjryanse\wechat\WxPay\lib\WxPayMchOutPay;
 use xjryanse\wechat\service\WechatWxPayRefundLogService;
 use xjryanse\finance\logic\FinanceRefundLogic;
 use xjryanse\wechat\service\WechatWxPayLogService;
@@ -16,7 +18,7 @@ class WxPayLogic
     
     protected $openid;
     /**
-     * @param type $wePubAppId  公众号id
+     * @param type $wePubAppId  公众号Appid
      * @param type $openid      openid
      */
     public function __construct( $wePubAppId, $openid ) {
@@ -35,6 +37,7 @@ class WxPayLogic
     public function getWxPayJsApiOrder( $outTradeNo, $money, $orderDescribe, $attach = '')
     {
         $appId                  = $this->wePubAppId;
+        $param['profit_sharing']= 'Y';  //Y-是，需要分账;N-否，不分账
         $param['openid']        = $this->openid;
         $param['body']          = $orderDescribe;    //商品简单描述
         $param['attach']        = $attach; //附加数据，在查询API和支付通知中原样返回
@@ -58,7 +61,18 @@ class WxPayLogic
         //退款日志记录
         return WechatWxPayRefundLogService::save($data);
     }
-
+    /**
+     * 付款至用户零钱
+     */
+    public function doOutcomePay($input)
+    {
+        $appId          = $this->wePubAppId;
+        $config         = WxPayConfigs::getInstance( $appId );
+        Debug::debug('$config', WxPayConfigs::getInstance( $appId )->getInfo());
+        
+        return (new JsApiPay())->doOutcomePay( $input, $config );
+    }
+    
     /*
      * 商户单号退款
      * @param type $paySn       商户单号

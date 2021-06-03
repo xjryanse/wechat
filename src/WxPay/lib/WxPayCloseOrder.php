@@ -6,6 +6,7 @@
 
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\wechat\WxPay\base\WxPayDataBase;
 /**
  * 
  * 关闭订单输入对象

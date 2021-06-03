@@ -2,9 +2,10 @@
 namespace xjryanse\wechat\WxPay;
 
 use xjryanse\wechat\WxPay\lib\WxPayUnifiedOrder;
-use xjryanse\wechat\WxPay\lib\WxPayConfigInterface;
+use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
 use xjryanse\wechat\WxPay\lib\WxPayApi;
 use xjryanse\wechat\WxPay\lib\WxPayRefund;
+use xjryanse\wechat\WxPay\lib\WxPayMchOutPay;
 /*
  * 微信JsApi支付配置信息
  */
@@ -27,6 +28,7 @@ class JsApiPay
         $input->SetGoods_tag(isset($param['goods_tag']) ? $param['goods_tag'] : '');
         $input->SetNotify_url(isset($param['notify_url']) ? $param['notify_url'] : $config->GetNotifyUrl()); //异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数
         $input->SetTrade_type('JSAPI');
+        $input->SetProfit_sharing( isset($param['profit_sharing']) ? $param['profit_sharing'] : '' );
         $input->SetOpenid( $openId );
 
         $order = WxPayApi::unifiedOrder($config, $input);
@@ -56,5 +58,24 @@ class JsApiPay
         $input->SetRefund_fee($refund_fee);
         $input->SetOp_user_id($config->GetMerchantId());
         return WxPayApi::refund($config, $input);
+    }
+    
+    public function doOutcomePay($param,$config)
+    {
+        $partnerTradeNo     = $param["partner_trade_no"];        
+        $openid             = $param["openid"];        
+        $desc               = $param["desc"];        
+        $spbillCreateIp     = $param["spbill_create_ip"];        
+        $amount             = $param["amount"];        
+
+        $input = new WxPayMchOutPay();
+        $input->setPartnerTradeNo($partnerTradeNo);
+        $input->setCheckName('NO_CHECK');
+        $input->setOpenid( $openid );
+        $input->setDesc($desc);
+        $input->setAmount($amount);   //金额
+        $input->setSpbillCreateIp( $spbillCreateIp );
+        
+        return WxPayApi::mchOutPay($config, $input);        
     }
 }

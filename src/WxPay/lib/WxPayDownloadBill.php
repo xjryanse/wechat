@@ -5,6 +5,7 @@
  * */
 
 namespace xjryanse\wechat\WxPay\lib;
+use xjryanse\wechat\WxPay\base\WxPayDataBase;
 
 /**
  * 

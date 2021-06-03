@@ -6,6 +6,7 @@
 
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\wechat\WxPay\base\WxPayDataBaseSignMd5;
 /**
  * 
  * 扫码支付模式一生成二维码参数

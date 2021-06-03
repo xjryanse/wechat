@@ -6,6 +6,8 @@
 
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\wechat\WxPay\base\WxPayDataBase;
+
 /**
  * 
  * 撤销输入对象

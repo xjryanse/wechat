@@ -6,6 +6,8 @@
 
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\wechat\WxPay\base\WxPayDataBase;
+
 /**
  * 
  * 统一下单输入对象
@@ -444,6 +446,14 @@ class WxPayUnifiedOrder extends WxPayDataBase {
      * */
     public function IsOpenidSet() {
         return array_key_exists('openid', $this->values);
+    }
+    
+    public function SetProfit_sharing($value) {
+        $this->values['profit_sharing'] = $value;
+    }
+
+    public function GetProfit_sharing() {
+        return $this->values['profit_sharing'];
     }
 
 }

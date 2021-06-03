@@ -3,8 +3,9 @@
 /**
  * 2015-06-29 修复签名问题
  * */
-
 namespace xjryanse\wechat\WxPay\lib;
+
+use xjryanse\wechat\WxPay\base\WxPayDataBaseSignMd5;
 
 /**
  * 

@@ -2,6 +2,8 @@
 
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\wechat\WxPay\base\WxPayException;
+use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
 use xjryanse\logic\Debug;
 /**
  * 
@@ -599,6 +601,32 @@ class WxPayApi {
         $time2 = explode(".", $time);
         $time = $time2[0];
         return $time;
+    }
+    
+    /**
+     * 
+     * @param WxPayConfigInterface $config  配置对象
+     * @param WxPayMchOutPay $inputObj
+     * @param int $timeOut
+     * @return type
+     */
+    public static function mchOutPay($config, $inputObj, $timeOut = 6) {
+        $url = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";
+        
+        $inputObj->setMchAppid($config->GetAppId()); //公众账号ID        
+        $inputObj->setMchid($config->GetMerchantId()); //商户号
+        $inputObj->setNonceStr(self::getNonceStr()); //随机字符串
+        $inputObj->setSign($config); //签名
+        
+        dump($inputObj);
+        $xml = $inputObj->ToXml();
+        dump($xml);
+        $startTimeStamp = self::getMillisecond(); //请求开始时间
+        $response = self::postXmlCurl($config, $xml, $url, true, $timeOut);
+        $result = WxPayResults::Init($config, $response);
+        self::reportCostTime($config, $url, $startTimeStamp, $result); //上报请求花费时间
+
+        return $result;
     }
 
 }

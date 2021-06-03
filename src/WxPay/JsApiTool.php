@@ -3,8 +3,9 @@ namespace xjryanse\wechat\WxPay;
 
 use xjryanse\wechat\WxPay\lib\WxPayApi;
 use xjryanse\wechat\WxPay\lib\WxPayJsApiPay;
-use xjryanse\wechat\WxPay\lib\WxPayException;
-use xjryanse\wechat\WxPay\lib\WxPayConfigInterface;
+use xjryanse\wechat\WxPay\base\WxPayException;
+use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
+
 /**
  * 
  * JSAPI支付实现类

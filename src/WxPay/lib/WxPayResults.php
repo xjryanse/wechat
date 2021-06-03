@@ -3,9 +3,12 @@
 /**
  * 2015-06-29 修复签名问题
  * */
-
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\wechat\WxPay\base\WxPayDataBase;
+use xjryanse\wechat\WxPay\base\WxPayException;
+use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
+use xjryanse\logic\Debug;
 /**
  * 
  * 接口调用结果类
@@ -110,6 +113,8 @@ class WxPayResults extends WxPayDataBase {
             }
             return $obj->GetValues();
         }
+
+        Debug::debug('调试打印【微信支付】返回对象', $obj);
         $obj->CheckSign($config);
         return $obj->GetValues();
     }

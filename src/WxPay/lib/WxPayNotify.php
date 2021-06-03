@@ -2,6 +2,8 @@
 
 namespace xjryanse\wechat\WxPay\lib;
 
+use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
+
 /**
  * 
  * 回调基础类
