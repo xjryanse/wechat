@@ -83,7 +83,17 @@ class WechatWePubFansService implements MainModelInterface
     public static function findByOpenid( $openid )
     {
         $con[] = [ 'openid', '=', $openid ];
-        $info = self::mainModel()->where($con)->find();
+        $info = self::mainModel()->where($con)->cache(86400)->find();
         return $info;
+    }
+    
+    public function fOpenid() {
+        return $this->getFFieldValue(__FUNCTION__);
+    }
+    public function fNickname() {
+        return $this->getFFieldValue(__FUNCTION__);
+    }
+    public function fSubscribe() {
+        return $this->getFFieldValue(__FUNCTION__);
     }
 }

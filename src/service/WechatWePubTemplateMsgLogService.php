@@ -2,7 +2,7 @@
 namespace xjryanse\wechat\service;
 
 use xjryanse\system\interfaces\MainModelInterface;
-
+use xjryanse\logic\Debug;
 /**
  * 模板消息发送记录
  */
@@ -22,7 +22,7 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface
     {
         $con[] = ['send_status','=',XJRYANSE_OP_TODO];
         $con[] = ['create_time','>=',date('Y-m-d H:i:s',time() - $withinSecond)];
-
+        Debug::debug('$todoListIds 的 $con',$con);
         $ids = self::mainModel()->where( $con )->column('id');
         return $ids;
     }
@@ -38,7 +38,7 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface
         return $res;
     }
     
-    public static function addTodo($acid,$message)
+    public static function addTodo($acid,$message,$data=[])
     {
         $data['acid']           = $acid;
         $data['message']        = json_encode($message);
@@ -46,5 +46,18 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface
         return self::save($data);
     }
     
-    
+    /**
+     * 来源表和来源id查是否有记录：
+     * 一般用于判断该笔记录是否已入账，避免重复入账
+     * @param type $fromTable   来源表
+     * @param type $fromTableId 来源表id
+     */
+    public static function hasLog( $fromTable, $fromTableId ,$con = [])
+    {
+        $con[] = ['from_table','=',$fromTable];
+        $con[] = ['from_table_id','=',$fromTableId];
+
+        return self::count($con) ? self::find( $con ) : false;
+    }
+
 }

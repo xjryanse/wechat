@@ -66,6 +66,11 @@ abstract class Base
         Debug::debug('Base getMyUrl() $name',$name);
         Debug::debug('Base getMyUrl() $urlTpl',BaseUrlTpl::$urlTpl);
         $url    = BaseUrlTpl::$urlTpl[$name];
-        return $this->replace( $url );
+        $realUrl = $this->replace( $url );
+        //本地真香调试【20210609】
+        if(in_array(Request::ip(),['127.0.0.1','::1'])){
+            $realUrl = 'http://tenancy.xiesemi.cn/wechat/we_pub/query?url='. urlencode($realUrl);    
+        }
+        return $realUrl;
     }
 }

@@ -76,6 +76,6 @@ class JsApiPay
         $input->setAmount($amount);   //金额
         $input->setSpbillCreateIp( $spbillCreateIp );
         
-        return WxPayApi::mchOutPay($config, $input);        
+        return WxPayApi::mchOutPay($config, $input);
     }
 }

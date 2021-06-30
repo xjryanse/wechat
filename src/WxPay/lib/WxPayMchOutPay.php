@@ -12,24 +12,6 @@ use xjryanse\wechat\WxPay\base\WxPayDataBase;
 class WxPayMchOutPay extends WxPayDataBase
 {
     /**
-     * 企业付款
-     */
-    public function transfers($config,$input)
-    {
-        $apiUrl = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers';
-        //
-        $this->values                     = array();
-        $this->values['nonce_str']        = WxPayApi::getNonceStr();
-        $this->values['partner_trade_no'] = $input['partner_trade_no'];//编码 随机唯一字符串32位
-        $this->values['mchid']            = $config->GetMerchantId();
-        $this->values['mch_appid']        = $config->GetAppId();
-        //
-        $res     = WxPayApi::postXmlCurl($config, $this->ToXml(), $apiUrl, true);
-        $resData = $this->FromXml($res);
-        return $resData;
-    }
-    
-    /**
      * 设置签名，详见签名生成算法
      * @param string $value 
      * */
@@ -93,5 +75,5 @@ class WxPayMchOutPay extends WxPayDataBase
     }
     public function getSpbillCreateIp() {
         return $this->values['spbill_create_ip'];
-    }    
+    }
 }

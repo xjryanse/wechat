@@ -5,9 +5,13 @@ use xjryanse\wechat\WxPay\WxPayConfigs;
 use xjryanse\wechat\WxPay\JsApiPay;
 use xjryanse\wechat\WxPay\lib\WxPayApi;
 use xjryanse\wechat\WxPay\lib\WxPayMchOutPay;
+use xjryanse\wechat\WxPay\sec\WxPaySecApi;
+use xjryanse\wechat\WxPay\sec\WxPaySecProfitSharing;    //单次分账
+use xjryanse\wechat\service\WechatWxPaySecService;
 use xjryanse\wechat\service\WechatWxPayRefundLogService;
 use xjryanse\finance\logic\FinanceRefundLogic;
 use xjryanse\wechat\service\WechatWxPayLogService;
+use xjryanse\logic\Arrays;
 use xjryanse\logic\Debug;
 /**
  * 微信支付逻辑
@@ -101,5 +105,57 @@ class WxPayLogic
             FinanceRefundLogic::doRefund( $logic['id'] );
         }
         return $resp;
+    }
+    
+    /**
+     * 
+     * @param type $param
+     * @param type $receivers
+     *  [{
+            "type": "MERCHANT_ID", 
+            "account":"190001001", 
+            "amount":100, 
+            "description": "分到商户" 
+        },{ 
+            "type": "PERSONAL_OPENID", 
+            "account":"86693952", 
+            "amount":888, 
+            "description": "分到个人" 
+        }]
+     * @return type
+     */
+    public function secProfitSharing( $param ,$receivers = [] )
+    {
+        $appId          = $this->wePubAppId;
+        $config         = WxPayConfigs::getInstance( $appId );
+        Debug::debug('$config', WxPayConfigs::getInstance( $appId )->getInfo());
+        
+        $input = new WxPaySecProfitSharing();
+        // 微信支付订单号 
+        $input->setTransactionId(Arrays::value($param, 'transaction_id'));
+        // 商户分账单号  
+        $input->setOutOrderNo(Arrays::value($param, 'out_order_no'));
+        foreach($receivers as $v){
+            $type           = Arrays::value($v, 'type');
+            $account        = Arrays::value($v, 'account');
+            $amount         = Arrays::value($v, 'amount');
+            $description    = Arrays::value($v, 'description');
+            $name           = Arrays::value($v, 'name');
+            //一个个添加
+            $input->addReceivers($type, $account, $amount, $description, $name);
+        }
+        $config->setSignType('HMAC-SHA256');
+        //分账信息记录
+        $logRes = WechatWxPaySecService::secLog( $input );
+        //返回结果记录
+        $res    = WxPaySecApi::profitSharing( $config, $input);
+        Debug::debug('secProfitSharing 的 res', $res);
+        // 更新字段，记录结果
+        $updData['response']    = json_encode($res, JSON_UNESCAPED_UNICODE);
+        $updData['result_code'] = Arrays::value($res, 'result_code');
+        $updData['return_code'] = Arrays::value($res, 'return_code');
+
+        WechatWxPaySecService::getInstance( $logRes['id'] )->update( $updData );
+        return $res;
     }
 }

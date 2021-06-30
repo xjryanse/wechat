@@ -6,6 +6,17 @@ namespace xjryanse\wechat\model;
  */
 class WechatWePub extends Base
 {
-
-
+    public function getQrcodeAttr($value) {
+        return self::getImgVal($value);
+    }
+    public function setQrcodeAttr($value) {
+        return self::setImgVal($value);
+    }
+    
+    public function getLogoAttr($value) {
+        return self::getImgVal($value);
+    }
+    public function setLogoAttr($value) {
+        return self::setImgVal($value);
+    }
 }

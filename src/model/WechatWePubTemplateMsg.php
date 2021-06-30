@@ -12,4 +12,21 @@ class WechatWePubTemplateMsg extends Base
         return $value ? json_decode($value,true) : [];
     }
 
+    /**
+     * 描述图标
+     * @param type $value
+     * @return type
+     */
+    public function getDescribeAttr($value) {
+        return self::getImgVal($value);
+    }
+
+    /**
+     * 描述图标
+     * @param type $value
+     * @throws \Exception
+     */
+    public function setDescribeAttr($value) {
+        return self::setImgVal($value);
+    }
 }

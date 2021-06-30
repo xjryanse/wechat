@@ -11,6 +11,7 @@ use xjryanse\wechat\WePub\wxurl\Datacube;
 use xjryanse\wechat\WePub\wxurl\Sns;
 use xjryanse\wechat\WePub\wxurl\Card;
 use xjryanse\curl\Query;
+use xjryanse\logic\Arrays;
 use think\facade\Request;
 use think\facade\Cache;
 use xjryanse\logic\Debug;
@@ -57,7 +58,7 @@ class Fans
     {
         //从本地服务器数据库获取用户授权AccessToken
         $token = $this->getOauthAccessTokenFromDb( $this->openid, $this->acid );
-
+        
         if(!$token || strtotime($token['expires_time']) < time()){
             //没有记录或者accesstoken过期
             return false;
@@ -80,7 +81,8 @@ class Fans
             $res['url']     = $userInfoUrl;
             $res['token']   = $this->token;
             $res['acid']    = $this->acid;
-            $fansInfo       = WechatWePubFansService::save($res);
+            //有openid，保存返回，没有，返回空
+            $fansInfo       = Arrays::value($res,'openid') ? WechatWePubFansService::save($res) : [];
         }
         return $fansInfo;
     }
@@ -144,6 +146,8 @@ class Fans
             //从微信服务器获取accessToken
             $accessTokenUrl = $this->wxUrl['CgiBin']->token();
             $res            = Query::geturl( $accessTokenUrl);
+//            dump($accessTokenUrl);
+//            dump($res);
             if( isset($res['errmsg'])){
                 throw new Exception( $res['errmsg'],$res['errcode']);
             }

@@ -14,4 +14,12 @@ class WechatWePubService implements MainModelInterface
     protected static $mainModel;
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWePub';
 
+    
+    public function fQrcode() {
+        return $this->getFFieldValue(__FUNCTION__);
+    }
+    
+    public function fLogo() {
+        return $this->getFFieldValue(__FUNCTION__);
+    }
 }

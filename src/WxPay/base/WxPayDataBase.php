@@ -6,6 +6,7 @@
 
 namespace xjryanse\wechat\WxPay\base;
 
+use xjryanse\logic\Strings;
 /**
  * 
  * 数据对象基础类，该类中定义数据类最基本的行为，包括：
@@ -63,7 +64,7 @@ class WxPayDataBase {
 
         $xml = "<xml>";
         foreach ($this->values as $key => $val) {
-            if (is_numeric($val)) {
+            if ( is_numeric($val) || (is_string($val) && Strings::isJson($val)) ) {
                 $xml .= "<" . $key . ">" . $val . "</" . $key . ">";
             } else {
                 $xml .= "<" . $key . "><![CDATA[" . $val . "]]></" . $key . ">";

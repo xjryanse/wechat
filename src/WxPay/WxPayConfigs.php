@@ -70,6 +70,13 @@ class WxPayConfigs extends WxPayConfigInterface
         $info = $this->getInfo();
         return $info ? $info['SignType'] : 'MD5';        
     }
+    /**
+     * 
+     */
+    public function setSignType( $value )
+    {
+        $this->info['SignType'] = $value;
+    }
 
     //=======【curl代理设置】===================================
     /**

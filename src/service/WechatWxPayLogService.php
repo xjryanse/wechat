@@ -31,6 +31,7 @@ class WechatWxPayLogService implements MainModelInterface {
         Debug::debug('拆解数据attach',json_decode($data['attach'], true));
         $data['statement_id']   = Arrays::value(json_decode($data['attach'], true),'statement_id');
         $data['company_id']     = FinanceStatementService::getInstance( $data['statement_id'] )->fCompanyId();
+        session( SESSION_COMPANY_ID, $data['company_id']);
         Debug::debug('拆解数据',$data);
         return $this->update($data);
     }

@@ -7,6 +7,7 @@
 namespace xjryanse\wechat\WxPay\lib;
 use xjryanse\wechat\WxPay\base\WxPayException;
 use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
+use xjryanse\wechat\WxPay\base\WxPayResults;
 
 /**
  *
