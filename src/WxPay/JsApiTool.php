@@ -5,7 +5,7 @@ use xjryanse\wechat\WxPay\lib\WxPayApi;
 use xjryanse\wechat\WxPay\lib\WxPayJsApiPay;
 use xjryanse\wechat\WxPay\base\WxPayException;
 use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
-
+use xjryanse\logic\Debug;
 /**
  * 
  * JSAPI支付实现类
@@ -77,7 +77,8 @@ class JsApiTool {
     public function GetJsApiParameters($UnifiedOrderResult) {
         if (!array_key_exists("appid", $UnifiedOrderResult) || !array_key_exists("prepay_id", $UnifiedOrderResult) || $UnifiedOrderResult['prepay_id'] == "") {
 //                        var_dump( $UnifiedOrderResult);
-            throw new WxPayException("参数错误:" . $UnifiedOrderResult['return_msg']);
+            Debug::debug('$UnifiedOrderResult',$UnifiedOrderResult);
+            throw new WxPayException("参数错误:" . $UnifiedOrderResult['err_code_des']);
         }
 
         $jsapi = new WxPayJsApiPay();

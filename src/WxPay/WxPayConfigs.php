@@ -3,7 +3,8 @@ namespace xjryanse\wechat\WxPay;
 
 use xjryanse\wechat\service\WechatWxPayConfigService;
 use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
-
+use xjryanse\logic\Debug;
+use Exception;
 /*
  * 微信支付配置信息
  */
@@ -28,6 +29,9 @@ class WxPayConfigs extends WxPayConfigInterface
         $this->info = WechatWxPayConfigService::getInstance( $this->uuid )->get();
         if( !$this->info ){
             $this->info = WechatWxPayConfigService::getByAppId( $this->uuid );
+        }
+        if(!$this->info){
+            throw new Exception('未获取到微信商户信息：'.$this->uuid );
         }
         return $this->info;
     }
@@ -68,6 +72,7 @@ class WxPayConfigs extends WxPayConfigInterface
     public function GetSignType()
     {
         $info = $this->getInfo();
+        Debug::debug('GetSignType的info',$info);
         return $info ? $info['SignType'] : 'MD5';        
     }
     /**

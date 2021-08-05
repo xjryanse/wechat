@@ -180,7 +180,7 @@ class Fans
             $jsapiTicketUrl = $this->wxUrl['CgiBin']->ticketGetticket( $this->accessToken );
             $res            = Query::geturl( $jsapiTicketUrl);
             $res['acid']    = $this->acid;
-            $res['expires_time'] = time() + $res['expires_in'];
+            $res['expires_time'] = time() + $res['expires_in'] - 60;
             
             Cache::set($key,$res);
             $jsapiTicket = $res;
@@ -231,7 +231,8 @@ class Fans
     {
         return WechatWePubFansService::mainModel()->where('acid',$acid)
                 ->where('openid',$openid)
-                ->order('id desc')                
+                ->order('id desc')
+                ->cache(300)
                 ->find();
     }
     /*

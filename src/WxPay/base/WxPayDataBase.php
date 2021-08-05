@@ -126,7 +126,7 @@ class WxPayDataBase {
         } else if ($config->GetSignType() == "HMAC-SHA256") {
             $string = hash_hmac("sha256", $string, $config->GetKey());
         } else {
-            throw new WxPayException("签名类型不支持！");
+            throw new WxPayException("签名类型".$config->GetSignType()."不支持！");
         }
 
         //签名步骤四：所有字符转为大写

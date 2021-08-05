@@ -43,6 +43,16 @@ class WechatWePubFansService implements MainModelInterface
         return self::ids( $con );
     }
     /**
+     * unionid转openid
+     * @param type $unionid
+     * @return type
+     */
+    public static function unionidToOpenid($unionid)
+    {
+        $con[] = ['unionid','=',$unionid];
+        return self::mainModel()->where($con )->value('openid');
+    }
+    /**
      * 更新用户信息
      * @param type $data
      * @return boolean
