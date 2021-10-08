@@ -2,7 +2,7 @@
 namespace xjryanse\wechat\service;
 
 use xjryanse\system\interfaces\MainModelInterface;
-
+use xjryanse\logic\Cachex;
 /**
  * 微信公众号粉丝用户绑定
  */
@@ -30,12 +30,14 @@ class WechatWePubFansUserService implements MainModelInterface
      */
     public static function getUserIdByOpenid( $openid,$scene = '')
     {
-        $con[] = ['openid','=',$openid ];
-        if( $scene ){
-            $con[] = ['scene','=',$scene ];
-        }
-        $info = self::find( $con );
-        return $info ? $info['user_id'] : '';
+        return Cachex::funcGet( __CLASS__.'_'.__METHOD__.$openid.$scene, function() use ($openid, $scene){
+            $con[] = ['openid','=',$openid ];
+            if( $scene ){
+                $con[] = ['scene','=',$scene ];
+            }
+            $info = self::find( $con );
+            return $info ? $info['user_id'] : '';
+        });
     }
     /**
      * 公司id

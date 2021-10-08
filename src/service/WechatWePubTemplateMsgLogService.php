@@ -3,6 +3,9 @@ namespace xjryanse\wechat\service;
 
 use xjryanse\system\interfaces\MainModelInterface;
 use xjryanse\logic\Debug;
+use xjryanse\logic\DbOperate;
+use xjryanse\logic\Arrays;
+use xjryanse\wechat\service\WechatWePubFansService;
 /**
  * 模板消息发送记录
  */
@@ -13,7 +16,32 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface
 
     protected static $mainModel;
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWePubTemplateMsgLog';
+    /**
+     * 来源表id取记录
+     * @param type $fromTableId
+     * @param type $fromTable
+     * @return type
+     */
+    public static function listByFromTableId($fromTableId, $fromTable='') {
+        $con[] = ['from_table_id','in',$fromTableId];
+        if($fromTable){
+            $con[] = ['from_table','=',$fromTable];
+        }
+        $listsRaw   = self::lists($con);
+        $lists      = $listsRaw ? $listsRaw->toArray() : [];
+        
+        $openids    = array_column($lists,'openid');
+        $cond[]      = ['openid','in',$openids];
+        $ids        = WechatWePubFansService::ids($cond);
+        $wechatWePubFans = WechatWePubFansService::batchGet($ids,'openid','openid,headimgurl,nickname');
+        // 循环用户
+        foreach($lists as &$v){
+            $v['wePubfansInfo'] = $wechatWePubFans[$v['openid']];
+        }
 
+        return $lists;
+    }
+    
     /**
      * 待执行任务列表
      * @param type $withinSecond    只查若干秒内:默认5分钟
@@ -31,6 +59,9 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface
      */
     public static function setDoing( $ids = [] )
     {
+        if(!$ids){
+            return false;
+        }
         $con[] = ['id','in',$ids];
         $con[] = ['send_status','=',XJRYANSE_OP_TODO];
 
@@ -40,6 +71,12 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface
     
     public static function addTodo($acid,$message,$data=[])
     {
+        $fromTable      = Arrays::value($data, 'from_table');
+        $fromTableId    = Arrays::value($data, 'from_table_id');
+        //拿公司id
+        $service        = DbOperate::getService($fromTable);
+        $info           = $service::getInstance($fromTableId)->get();
+        $data['company_id']     = Arrays::value($info, 'company_id');
         $data['acid']           = $acid;
         $data['message']        = json_encode($message);
         $data['send_status']    = XJRYANSE_OP_TODO;

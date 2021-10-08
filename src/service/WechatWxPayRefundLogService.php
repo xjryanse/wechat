@@ -18,7 +18,9 @@ class WechatWxPayRefundLogService implements MainModelInterface
 
     protected static $mainModel;
     protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWxPayRefundLog';
-
+    //直接执行后续触发动作
+    protected static $directAfter = true;
+    
     public static function extraAfterSave(&$data, $uuid) {
         $result     = Arrays::value($data, 'result_code');
         //状态S-交易成功；F-交易失败；A-等待授权；Z-交易未知；D-订单已撤销

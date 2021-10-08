@@ -12,6 +12,7 @@ use xjryanse\wechat\WePub\wxurl\Sns;
 use xjryanse\wechat\WePub\wxurl\Card;
 use xjryanse\curl\Query;
 use xjryanse\logic\Arrays;
+use xjryanse\logic\Cachex;
 use think\facade\Request;
 use think\facade\Cache;
 use xjryanse\logic\Debug;
@@ -31,7 +32,7 @@ class Fans
     {
         $this->acid     = $acid;
         $this->openid   = $openid;
-        $app = WechatWePubService::getInstance($this->acid)->get();
+        $app = WechatWePubService::getInstance($this->acid)->getCache();
         if(!$app){
             echo json_encode(['code' => '1',"msg"=>'公众号不存在[xjryanse\wechat\WePub]']); exit;
         }
@@ -58,7 +59,7 @@ class Fans
     {
         //从本地服务器数据库获取用户授权AccessToken
         $token = $this->getOauthAccessTokenFromDb( $this->openid, $this->acid );
-        
+        Debug::debug('$token',$token);
         if(!$token || strtotime($token['expires_time']) < time()){
             //没有记录或者accesstoken过期
             return false;
@@ -221,19 +222,24 @@ class Fans
      */
     private static function getOauthAccessTokenFromDb($openid,$acid)
     {
-        return WechatWePubOauthAccessTokenService::mainModel()->where('acid',$acid)
-                ->where('openid',$openid)
-                ->order('id desc')
-                ->find();
+        return WechatWePubOauthAccessTokenService::tokenGet($openid, $acid);
+//        return WechatWePubOauthAccessTokenService::mainModel()->where('acid',$acid)
+//                ->where('openid',$openid)
+//                ->order('id desc')
+//                ->find();
     }
     
     private static function getUserInfoFromDb($openid,$acid)
     {
-        return WechatWePubFansService::mainModel()->where('acid',$acid)
-                ->where('openid',$openid)
-                ->order('id desc')
-                ->cache(300)
-                ->find();
+        $key = 'Fans_getUserInfoFromDb_'.$openid.'_'.$acid;
+        $fansInfo = Cachex::funcGet($key, function() use ($openid,$acid){
+            return WechatWePubFansService::mainModel()->where('acid',$acid)
+                    ->where('openid',$openid)
+                    ->order('id desc')
+                    ->cache(300)
+                    ->find();
+        });
+        return $fansInfo;
     }
     /*
     private static function getAccessTokenFromDb( $acid )

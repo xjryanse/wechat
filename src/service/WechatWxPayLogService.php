@@ -9,6 +9,7 @@ use xjryanse\system\interfaces\MainModelInterface;
 use xjryanse\wechat\model\WechatWxPayLog;
 use xjryanse\logic\Arrays;
 use xjryanse\logic\Debug;
+use Exception;
 use think\Db;
 /**
  * 微信支付记录
@@ -20,12 +21,14 @@ class WechatWxPayLogService implements MainModelInterface {
 
     protected static $mainModel;
     protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWxPayLog';
-
+    //直接执行后续触发动作
+    protected static $directAfter = true;
+    
     /**
      * 拆解val数据保存
      */
     public function tearValData() {
-        $info = $this->get();
+        $info = $this->get( MASTER_DATA );
         //val转数组
         $data = json_decode($info['val'], true);
         Debug::debug('拆解数据attach',json_decode($data['attach'], true));
@@ -55,6 +58,11 @@ class WechatWxPayLogService implements MainModelInterface {
         Debug::debug('addFinanceAccountLog::输入信息',$log);
         $statementId            = $log['statement_id'];
         $statement              = FinanceStatementService::getInstance( $statementId )->get();
+        Debug::debug('addFinanceAccountLog::$statementId信息',$statementId);
+        Debug::debug('addFinanceAccountLog::$statement信息',$statement);
+        if(!$statementId || !$statement){
+            throw new Exception('账单不存在');
+        }
 
         $data['company_id']     = $log['company_id'];
         $data['user_id']        = Arrays::value($statement, 'user_id');

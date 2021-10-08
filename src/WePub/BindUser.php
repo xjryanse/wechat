@@ -21,11 +21,12 @@ class BindUser
      */
     public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$extraData = [] )
     {
-        $con    = [];
-        $con[]  = ['openid','=',$openid];
-        $con[]  = ['scene','=',$scene];
-        $info   = WechatWePubFansUserService::find( $con ,0);   //无缓存查数据 
-        if( !$info && $emptyCreate){
+//        $con    = [];
+//        $con[]  = ['openid','=',$openid];
+//        $con[]  = ['scene','=',$scene];
+//        $info   = WechatWePubFansUserService::find( $con ,0);   //无缓存查数据 
+        $userId   = WechatWePubFansUserService::getUserIdByOpenid($openid, $scene);
+        if( !$userId && $emptyCreate){
             $cond = [];
             $cond[]      = ['username','=',$openid];
             $userInfo   = UserService::find( $cond );
@@ -47,9 +48,10 @@ class BindUser
             $data['scene']      = $scene;
             $data['user_id']    = $userInfo['id'];
             $info = WechatWePubFansUserService::save( $data );
+            $userId = $userInfo['id'];
         }
 
-        return $info ? $info['user_id'] : '';
+        return $userId;
     }
     /**
      * 用户改绑

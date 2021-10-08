@@ -6,6 +6,7 @@ use xjryanse\wechat\service\WechatWeAppService;
 use xjryanse\wechat\service\WechatWePubService;
 use xjryanse\logic\Arrays;
 use xjryanse\logic\Debug;
+use xjryanse\logic\Cachex;
 /**
  * 微信支付配置
  */
@@ -32,5 +33,17 @@ class WechatWxPayConfigService implements MainModelInterface
             $info['AppId'] = $appId;    //公众账号appid替换
         }
         return $info;
+    }
+    /**
+     * 公司id，取微信支付key
+     * @param type $companyId
+     * @return type
+     */
+    public static function getByCompanyId($companyId){
+        $key = 'WechatWxPayConfigService_getByCompanyId_'.$companyId;
+        return Cachex::funcGet($key, function() use ($companyId){
+            $con[]  = ['company_id','=',$companyId];
+            return self::mainModel()->where( $con )->find();
+        });
     }
 }

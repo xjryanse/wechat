@@ -2,6 +2,9 @@
 namespace xjryanse\wechat\WePub;
 
 use xjryanse\curl\Query;
+use xjryanse\logic\Arrays;
+use xjryanse\logic\Strings;
+use xjryanse\logic\Debug;
 use xjryanse\wechat\service\WechatWePubTemplateMsgService;
 
 class TemplateMsg
@@ -48,7 +51,7 @@ class TemplateMsg
     /**
      * 拼接模板消息
      */
-    public static function matchAll( $key,$openids, $url, $data, $replaceRule = [] )
+    public static function matchAll( $key,$openids, $data, $replaceRule = [] )
     {
         $con[] = ['company_id', '=' , isset($data['company_id']) ? $data['company_id'] : session(SESSION_COMPANY_ID)];
         $con[] = ['template_key', '=' , $key ];
@@ -56,6 +59,11 @@ class TemplateMsg
         if(!$info['template_id']){
             return false;
         }
+        Debug::debug('$info',$info);
+        //后台配置的目标表
+        $targetUrl = Strings::dataReplace(Arrays::value($info, 'target_url'),$data);
+        Debug::debug('$data',$data);
+        Debug::debug('$targetUrl',$targetUrl);
         //外部替换规则优先
         $rule  = $replaceRule ? : $info['replace_rule'];
         $messages = [];
@@ -64,7 +72,7 @@ class TemplateMsg
                 continue;
             }
 
-            $sendData       = self::matchOne( $info['template_id'], $openid, $url, $data, $rule  );
+            $sendData       = self::matchOne( $info['template_id'], $openid, $targetUrl, $data, $rule  );
 //            dump($sendData);
             $messages[]     = $sendData;
         }

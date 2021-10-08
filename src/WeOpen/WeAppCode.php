@@ -67,6 +67,7 @@ class WeAppCode extends Base
     }
     /**
      * 查询最新一次提交的审核状态
+     * https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/code/get_latest_auditstatus.html
      * @return type
      */
     public function getLatestAutidstatus(){
