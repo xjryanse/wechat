@@ -6,6 +6,8 @@ namespace xjryanse\wechat\model;
  */
 class WechatWePubTemplateMsg extends Base
 {
+    //20230728 是否将数据缓存到文件
+    public static $cacheToFile = true;
 
     public function getReplaceRuleAttr($value)
     {

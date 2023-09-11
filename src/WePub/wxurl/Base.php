@@ -2,6 +2,7 @@
 namespace xjryanse\wechat\WePub\wxurl;
 
 use xjryanse\logic\Debug;
+use xjryanse\system\logic\ConfigLogic;
 use think\facade\Request;
 
 abstract class Base
@@ -28,7 +29,7 @@ abstract class Base
             throw new \Exception('appid和secret参数错误！');
         }
         //回调地址
-        $this->redirectUri = $redirectUri ? : Request::domain( ).'/wechat/we_pub/authorize';
+        $this->redirectUri = $redirectUri ? : Request::domain( ).'/'.session(SESSION_COMPANY_KEY).'/wechat/we_pub/authorize';
     }
     /**
      * 设定AccessToken
@@ -69,8 +70,15 @@ abstract class Base
         $realUrl = $this->replace( $url );
         //本地真香调试【20210609】
         if(in_array(Request::ip(),['127.0.0.1','::1'])){
-            $realUrl = 'http://tenancy.xiesemi.cn/wechat/we_pub/query?url='. urlencode($realUrl);    
+            $wxRedirectBaseUrl = $this->getWxRedirectBaseUrl();
+            $realUrl = $wxRedirectBaseUrl.'/wechat/we_pub/query?url='. urlencode($realUrl);    
         }
         return $realUrl;
+    }
+    /**
+     * 获取微信授权跳转基本URL，用于本地真香调试
+     */
+    protected function getWxRedirectBaseUrl(){
+        return ConfigLogic::config('wxRedirectBaseUrl') ? : 'http://axsl.xiesemi.cn/';        
     }
 }

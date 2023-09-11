@@ -6,6 +6,11 @@ namespace xjryanse\wechat\model;
  */
 class WechatWePub extends Base
 {
+        //20230728 是否将数据缓存到文件
+    public static $cacheToFile = true;
+
+    public static $picFields = ['qrcode','logo'];
+    
     public function getQrcodeAttr($value) {
         return self::getImgVal($value);
     }

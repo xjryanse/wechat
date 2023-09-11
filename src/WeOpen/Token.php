@@ -37,6 +37,8 @@ class Token extends Base
             $res = Query::posturl($url, $data);
             $res['acid']            = $this->uuid;
             $res['expires_time']    = time() + $res['expires_in'] - 60;
+            Debug::debug('getApiComponentToken 的 远程$url',$url);
+            Debug::debug('getApiComponentToken 的 远程$data',$data);
             Debug::debug('getApiComponentToken 的 远程',$res);
             if($res['component_access_token']){
                 Cache::set($key,$res);

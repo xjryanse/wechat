@@ -51,7 +51,7 @@ class WeAppCode extends Base
     public function getQrcode( $path='' ){
         $authorizerAccessToken     = $this->getApiAuthorizerToken();
         $url    ='https://api.weixin.qq.com/wxa/get_qrcode?access_token='.$authorizerAccessToken.'&path='.$path;
-        //保存图片
+        //，因为有ip限制，故需保存图片
         $resp = FileLogic::saveUrlFile($url);
         return $resp;
     }
@@ -62,7 +62,13 @@ class WeAppCode extends Base
     public function submitAudit(){
         $authorizerAccessToken     = $this->getApiAuthorizerToken();
         $url = 'https://api.weixin.qq.com/wxa/submit_audit?access_token='.$authorizerAccessToken;
-        $res = Query::posturl($url,[]);
+        Debug::debug('submitAudit的$url',$url);
+        // 2023-02-13 审核项列表
+        $data['item_list'] = [];
+        // 代码中含有ext.json未配置隐私接口getLocation(暂无权限)，请配置并申请权限或者承诺不使用这些接口（设置参数privacy_api_not_use为true）后再提交审核
+        $data['privacy_api_not_use'] = true;
+        $res = Query::posturl($url,$data);
+        Debug::debug('submitAudit的$res',$res);
         return $res;
     }
     /**
@@ -73,6 +79,16 @@ class WeAppCode extends Base
     public function getLatestAutidstatus(){
         $authorizerAccessToken     = $this->getApiAuthorizerToken();
         $url = 'https://api.weixin.qq.com/wxa/get_latest_auditstatus?access_token='.$authorizerAccessToken;
+        $res = Query::geturl($url);
+        return $res;
+    }
+    /*
+     * 撤回审核
+     * https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/code/undocodeaudit.html
+     */
+    public function undoCodeAudit(){
+        $authorizerAccessToken     = $this->getApiAuthorizerToken();
+        $url = 'https://api.weixin.qq.com/wxa/undocodeaudit?access_token='.$authorizerAccessToken;
         $res = Query::geturl($url);
         return $res;
     }

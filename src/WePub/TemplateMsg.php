@@ -6,6 +6,7 @@ use xjryanse\logic\Arrays;
 use xjryanse\logic\Strings;
 use xjryanse\logic\Debug;
 use xjryanse\wechat\service\WechatWePubTemplateMsgService;
+use Exception;
 
 class TemplateMsg
 {
@@ -53,28 +54,42 @@ class TemplateMsg
      */
     public static function matchAll( $key,$openids, $data, $replaceRule = [] )
     {
+        if(!is_array($openids)){
+            $openids = [$openids];
+        }
         $con[] = ['company_id', '=' , isset($data['company_id']) ? $data['company_id'] : session(SESSION_COMPANY_ID)];
         $con[] = ['template_key', '=' , $key ];
         $info  = WechatWePubTemplateMsgService::find( $con );
+        Debug::debug('WechatWePubTemplateMsgService的LastSql',WechatWePubTemplateMsgService::mainModel()->getLastSql());
         if(!$info['template_id']){
-            return false;
+            throw new Exception('消息模板不存在:'.$key);
         }
         Debug::debug('$info',$info);
-        //后台配置的目标表
-        $targetUrl = Strings::dataReplace(Arrays::value($info, 'target_url'),$data);
-        Debug::debug('$data',$data);
-        Debug::debug('$targetUrl',$targetUrl);
         //外部替换规则优先
         $rule  = $replaceRule ? : $info['replace_rule'];
+        Debug::debug('$rule',$rule);        
+        
+        $weApp = [];
+        if($info['we_appid'] && $info['we_pagepath']){
+            $weApp['appid']         = $info['we_appid'];
+            $weApp['pagepath']   = $info['we_pagepath'];
+        }
+        
         $messages = [];
         foreach($openids as $openid){
             if(!$openid){
                 continue;
             }
-
-            $sendData       = self::matchOne( $info['template_id'], $openid, $targetUrl, $data, $rule  );
+            $msgLogId           = WechatWePubTemplateMsgService::mainModel()->newId();
+            $data['msgLogId']   = $msgLogId;
+            //后台配置的目标表
+            $targetUrl = Strings::dataReplace(Arrays::value($info, 'target_url'),$data);
+            Debug::debug('$data',$data);
+            Debug::debug('$targetUrl',$targetUrl);
+            
+            $sendData           = self::matchOne( $info['template_id'], $openid, $targetUrl, $data, $rule ,$weApp );
 //            dump($sendData);
-            $messages[]     = $sendData;
+            $messages[]         = ['sendData'=>$sendData,'msgLogId'=>$msgLogId];
         }
         return $messages;
     }
@@ -88,15 +103,20 @@ class TemplateMsg
      * @param type $replaceRule         替换规则
      * @return type
      */
-    public static function matchOne( $templateId, $openid, $url, $data, $replaceRule  )
+    public static function matchOne( $templateId, $openid, $url, $data, $replaceRule ,$weApp=[] )
     {
         $sendData['touser']         = $openid;
         $sendData['template_id']    = $templateId;
         $sendData['url']            = $url;
+        if($weApp){
+            $sendData['miniprogram'] = $weApp;
+        }
         if(is_array($replaceRule)){
             foreach( $replaceRule as $k=>$v) {
                 //字段存在，则取字段，否则，取原样
-                $sendData['data'][ $k ]['value']  = isset($data[$v['value']]) ? $data[$v['value']] : $v['value'] ;
+                //$sendData['data'][ $k ]['value']  = isset($data[$v['value']]) ? $data[$v['value']] : $v['value'] ;
+                //20220808
+                $sendData['data'][ $k ]['value']  = Arrays::value($data, $v['value'],'') ;
                 $sendData['data'][ $k ]['color']  = $v['color'];
             }
         }

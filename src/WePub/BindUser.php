@@ -5,7 +5,9 @@ use xjryanse\wechat\service\WechatWePubFansUserService;
 use xjryanse\wechat\service\WechatWePubFansService;
 use xjryanse\user\service\UserService;
 use xjryanse\logic\Arrays;
+use xjryanse\logic\Debug;
 use xjryanse\system\logic\FileLogic;
+use Exception;
 /*
  * 绑定用户逻辑类库
  */
@@ -21,22 +23,42 @@ class BindUser
      */
     public static function getBindUserId( $openid, $scene="", $emptyCreate = false ,$extraData = [] )
     {
+        if(!$openid){
+            throw new Exception('$openid必须');
+        }
 //        $con    = [];
 //        $con[]  = ['openid','=',$openid];
 //        $con[]  = ['scene','=',$scene];
 //        $info   = WechatWePubFansUserService::find( $con ,0);   //无缓存查数据 
         $userId   = WechatWePubFansUserService::getUserIdByOpenid($openid, $scene);
+        Debug::debug('getBindUserId的$userId',$userId);
         if( !$userId && $emptyCreate){
-            $cond = [];
-            $cond[]      = ['username','=',$openid];
-            $userInfo   = UserService::find( $cond );
+            $fansInfo = WechatWePubFansService::findByOpenid($openid);
+            $userDataRaw   = Arrays::getByKeys($fansInfo ? $fansInfo->toArray() : [], ['nickname','realname','phone']);
+            //20220207 null能写，空不能写
+            $phone = $userDataRaw['phone'] ? : null;     
+            //20220604:增加用手机号码获取用户的逻辑    
+            //【先手机号码取】
+            $userInfo = [];
+            if( $phone ){
+                $cone = [];
+                $cone[]      = ['phone','=',$phone];
+                $userInfo   = UserService::find( $cone );
+            }
+            //【再openid取】
             if( !$userInfo ){
-                //创建空用户
-                $fansInfo = WechatWePubFansService::findByOpenid($openid);
+                $cond = [];
+                $cond[]      = ['username','=',$openid];
+                $userInfo   = UserService::find( $cond );
+            }
+            //【手机号码和openid都没找到，创建】
+            if( !$userInfo ){
                 //头像下载到本地服务器
                 $headImgInfo = FileLogic::saveUrlFile($fansInfo['headimgurl']);
                 //昵称头像存储
-                $userData   = Arrays::getByKeys($fansInfo->toArray(), ['nickname']);
+                $userData   = Arrays::unsetEmpty($userDataRaw);
+                //20220604:增加用手机号码获取用户的逻辑                
+                $userData['phone']    = $phone;     
                 //头像
                 $userData['headimg']    = $headImgInfo ? $headImgInfo['id'] : '';
                 $userData['username']   = $openid;      //用openid作临时用户名

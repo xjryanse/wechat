@@ -6,6 +6,8 @@ use xjryanse\wechat\WxPay\lib\WxPayJsApiPay;
 use xjryanse\wechat\WxPay\base\WxPayException;
 use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
 use xjryanse\logic\Debug;
+use xjryanse\logic\Arrays;
+use Exception;
 /**
  * 
  * JSAPI支付实现类
@@ -75,6 +77,9 @@ class JsApiTool {
      * @return json数据，可直接填入js函数作为参数
      */
     public function GetJsApiParameters($UnifiedOrderResult) {
+        if(Arrays::value($UnifiedOrderResult, 'return_code') == 'FAIL'){
+            throw new Exception(Arrays::value($UnifiedOrderResult, 'return_msg'));
+        }
         if (!array_key_exists("appid", $UnifiedOrderResult) || !array_key_exists("prepay_id", $UnifiedOrderResult) || $UnifiedOrderResult['prepay_id'] == "") {
 //                        var_dump( $UnifiedOrderResult);
             Debug::debug('$UnifiedOrderResult',$UnifiedOrderResult);

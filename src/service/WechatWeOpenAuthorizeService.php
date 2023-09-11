@@ -12,6 +12,7 @@ class WechatWeOpenAuthorizeService extends Base implements MainModelInterface {
 
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelQueryTrait;
 
     protected static $mainModel;
     protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWeOpenAuthorize';
@@ -19,30 +20,58 @@ class WechatWeOpenAuthorizeService extends Base implements MainModelInterface {
     /**
      * 授权后保存授权数据
      */
-    public static function authSave($weOpenId , $authData )
-    {
-        $data               = $authData['authorization_info'];
+    public static function authSave($weOpenId, $authData) {
+        $data = $authData['authorization_info'];
         $data['we_open_id'] = $weOpenId;
-        $data['func_info']  = json_encode($data['func_info']);
-        $authorizerAppid    = Arrays::value($data, 'authorizer_appid');
-        $con[] = ['authorizer_appid','=',$authorizerAppid];
+        $data['func_info'] = json_encode($data['func_info']);
+        $authorizerAppid = Arrays::value($data, 'authorizer_appid');
+        $con[] = ['authorizer_appid', '=', $authorizerAppid];
         $id = self::mainModel()->where($con)->value('id');
-        if( $id ){
-            self::getInstance( $id )->update($data);
+        if ($id) {
+            self::getInstance($id)->update($data);
         } else {
             self::save($data);
         }
-        return self::find($con,0);
+        return self::find($con, 0);
     }
+
     /**
      * 根据授权方appid，取授权信息
      * @param type $authorizerAppid
      * @return type
      */
-    public static function getByAuthorizerAppid($authorizerAppid){
-        $con[] = ['authorizer_appid','=',$authorizerAppid];
-        return self::find( $con );
+    public static function getByAuthorizerAppid($authorizerAppid) {
+        $con[] = ['authorizer_appid', '=', $authorizerAppid];
+        return self::find($con);
     }
+
+    /**
+     * 授权账号appid,取开放平台id
+     */
+    public static function authorizerAppidGetWeOpenId($authorizerAppid) {
+        $con[] = ['authorizer_appid', '=', $authorizerAppid];
+        return self::mainModel()->where($con)->value('we_open_id');
+    }
+
+    /**
+     * 20220514
+     * @param type $authorizerAppid
+     * @return type
+     */
+    public static function appidGetId($authorizerAppid) {
+        $con[] = ['authorizer_appid', '=', $authorizerAppid];
+        return self::mainModel()->where($con)->value('id');
+    }
+
+    /**
+     * 设定小程序状态
+     * 
+     */
+    public function setAppStatus($status) {
+        $data['app_status'] = $status;
+        return $this->update($data);
+    }
+
     /**
      *
      */

@@ -6,12 +6,14 @@ use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
 use xjryanse\wechat\WxPay\lib\WxPayApi;
 use xjryanse\wechat\WxPay\lib\WxPayRefund;
 use xjryanse\wechat\WxPay\lib\WxPayMchOutPay;
+use xjryanse\wechat\WxPay\lib\WxPayOrderQuery;
+
 /*
  * 微信JsApi支付配置信息
  */
 class JsApiPay
 {
-    public function order( $param,WxPayConfigInterface $config)
+    public function order( $param, $config)
     {
         $tools = new JsApiTool();
         $tools->setConfig($config);
@@ -78,4 +80,13 @@ class JsApiPay
         
         return WxPayApi::mchOutPay($config, $input);
     }
+    
+    
+    public function orderQuery($param,$config)
+    {
+        $input = new WxPayOrderQuery();
+        
+        return WxPayApi::orderQuery($config, $input);
+    }
+    
 }

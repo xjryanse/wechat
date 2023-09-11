@@ -7,6 +7,7 @@ use xjryanse\finance\logic\FinanceIncomePayLogic;
 use xjryanse\wechat\service\WechatWxPayLogService;
 use xjryanse\wechat\service\WechatWxPayRefundLogService;
 use xjryanse\finance\logic\UserPayLogic;
+use xjryanse\logic\Debug;
 use think\Db;
 use Exception;
 /*
@@ -39,6 +40,7 @@ class DealOrder
      */
     public static function dealOrderFinance( $wxPayLogId )
     {
+        WechatWxPayLogService::checkTransaction();
         //无缓存拿数据
         $info       = WechatWxPayLogService::getInstance( $wxPayLogId )->get(0); 
         if(!$info){
@@ -48,8 +50,10 @@ class DealOrder
         //获取支付单id
         $con[] = ['income_id','=',$info['statement_id']];
         $financeIncomePay = FinanceIncomePayService::mainModel()->where($con)->order('id desc')->find();
+        Debug::debug('$financeIncomePay', $financeIncomePay);
         if(!$financeIncomePay){
-            throw new Exception( '未找到'. $arrayData['out_trade_no'] .'对应支付单信息' );
+            //20220717:增加$wxPayLogId
+            throw new Exception( '未找到'. $arrayData['out_trade_no'] .'对应支付单信息，$wxPayLogId'.$wxPayLogId );
         }
         return UserPayLogic::afterPay($financeIncomePay['id']);
 

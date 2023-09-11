@@ -9,7 +9,7 @@ class CgiBin extends Base
      * @param type $arguments
      * @return type
      */
-    public function __call($name,$arguments) { 
+    public function __call($name,$arguments) {
         $class = (new \ReflectionClass( __CLASS__ ))->getShortName();
         return $this->getMyUrl($class, $name );
     }

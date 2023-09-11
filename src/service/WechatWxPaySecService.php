@@ -1,4 +1,5 @@
 <?php
+
 namespace xjryanse\wechat\service;
 
 use xjryanse\system\interfaces\MainModelInterface;
@@ -13,13 +14,14 @@ use think\Db;
 /**
  * 
  */
-class WechatWxPaySecService extends Base implements MainModelInterface
-{
+class WechatWxPaySecService extends Base implements MainModelInterface {
+
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelQueryTrait;
 
     protected static $mainModel;
-    protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWxPaySec';
+    protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWxPaySec';
 
     /**
      * 分账由服务端发起请求，直接可得结果，不存在回调
@@ -27,54 +29,54 @@ class WechatWxPaySecService extends Base implements MainModelInterface
      * @param type $data
      * @param type $uuid
      */
-    public static function extraAfterUpdate( &$data, $uuid ){
-        $result     = Arrays::value($data, 'result_code');
+    public static function extraAfterUpdate(&$data, $uuid) {
+        $result = Arrays::value($data, 'result_code');
         //状态S-交易成功；F-交易失败；A-等待授权；Z-交易未知；D-订单已撤销
-        $info = self::getInstance( $uuid )->get();
-        if( $result == 'SUCCESS' && !FinanceAccountLogService::statementHasLog( $info['out_order_no'] ) ){
+        $info = self::getInstance($uuid)->get();
+        if ($result == 'SUCCESS' && !FinanceAccountLogService::statementHasLog($info['out_order_no'])) {
             Db::startTrans();
-            self::addFinanceAccountLog( $info );
+            self::addFinanceAccountLog($info);
             Db::commit();
         }
     }
-    
-    public static function secLog(WxPaySecProfitSharing $input){
+
+    public static function secLog(WxPaySecProfitSharing $input) {
         $data['transaction_id'] = $input->getTransactionId();
-        $data['out_order_no']   = $input->getOutOrderNo();
+        $data['out_order_no'] = $input->getOutOrderNo();
         //保存分账账单
-        $res            = self::save( $data );
-        $receivers      = $input->getReceivers();
-        $receiversArr   = json_decode($receivers,true);
-        foreach( $receiversArr as &$v){
-            $v['sec_id']            = $res['id'];
-            $v['transaction_id']    = $input->getTransactionId();
-            $v['out_order_no']      = $input->getOutOrderNo();
+        $res = self::save($data);
+        $receivers = $input->getReceivers();
+        $receiversArr = json_decode($receivers, true);
+        foreach ($receiversArr as &$v) {
+            $v['sec_id'] = $res['id'];
+            $v['transaction_id'] = $input->getTransactionId();
+            $v['out_order_no'] = $input->getOutOrderNo();
         }
         //保存账单接收方
-        WechatWxPaySecReceiversService::saveAll( $receiversArr );
+        WechatWxPaySecReceiversService::saveAll($receiversArr);
         return $res;
     }
-    
+
     /*
      * 写入微信商户
      */
-    public static function addFinanceAccountLog(WechatWxPaySec $log)
-    {
-        $statementId            = $log['out_order_no'];
-        $statement              = FinanceStatementService::getInstance( $statementId )->get();
+    public static function addFinanceAccountLog($log) {
+        $statementId = $log['out_order_no'];
+        $statement = FinanceStatementService::getInstance($statementId)->get();
 
-        $data['company_id']     = $log['company_id'];
-        $data['user_id']        = Arrays::value($statement, 'user_id');
-        $data['customer_id']    = Arrays::value($statement, 'customer_id');
-        $data['money']          = Arrays::value($statement, 'need_pay_prize');
-        $data['statement_id']   = $statementId;
-        $data['reason']         = Arrays::value($statement, 'statement_name');
-        $data['change_type']    = Arrays::value($statement, 'change_type');
-        $data['account_id']     = FinanceAccountService::getIdByAccountType($log['company_id'], 'wxMch');      //微信商户号
-        $data['from_table']     = self::mainModel()->getTable();
-        $data['from_table_id']  = $log['id'];
+        $data['company_id'] = $log['company_id'];
+        $data['user_id'] = Arrays::value($statement, 'user_id');
+        $data['customer_id'] = Arrays::value($statement, 'customer_id');
+        $data['money'] = Arrays::value($statement, 'need_pay_prize');
+        $data['statement_id'] = $statementId;
+        $data['reason'] = Arrays::value($statement, 'statement_name');
+        $data['change_type'] = Arrays::value($statement, 'change_type');
+        $data['account_id'] = FinanceAccountService::getIdByAccountType($log['company_id'], 'wxMch');      //微信商户号
+        $data['from_table'] = self::mainModel()->getTable();
+        $data['from_table_id'] = $log['id'];
         return FinanceAccountLogService::save($data);
     }
+
     /**
      *
      */
@@ -179,4 +181,5 @@ class WechatWxPaySecService extends Base implements MainModelInterface
     public function fUpdateTime() {
         return $this->getFFieldValue(__FUNCTION__);
     }
+
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace xjryanse\wechat\service;
 
 use xjryanse\system\interfaces\MainModelInterface;
@@ -6,16 +7,15 @@ use xjryanse\system\interfaces\MainModelInterface;
 /**
  * 
  */
-class WechatWxPaySecReceiversService extends Base implements MainModelInterface
-{
+class WechatWxPaySecReceiversService extends Base implements MainModelInterface {
+
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelQueryTrait;
 
     protected static $mainModel;
-    protected static $mainModelClass    = '\\xjryanse\\wechat\\model\\WechatWxPaySecReceivers';
+    protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWxPaySecReceivers';
 
-
-    
     /**
      *
      */
@@ -148,4 +148,5 @@ class WechatWxPaySecReceiversService extends Base implements MainModelInterface
     public function fUpdateTime() {
         return $this->getFFieldValue(__FUNCTION__);
     }
+
 }

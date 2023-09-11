@@ -121,4 +121,19 @@ biz_appid	否	指定授权唯一的小程序或公众号
         return $res;
     }
     
+    /**
+     * 拉取所有已授权的帐号信息
+     * https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/ThirdParty/Account_Authorization/api_get_authorizer_list.html
+     */
+    public function apiGetAuthorizerList(){
+        $componentAccessToken      = Token::getInstance( $this->uuid )->getApiComponentToken();
+        $url ='https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_list?component_access_token='.$componentAccessToken;
+        //$data['component_access_token']     = $componentAccessToken;
+        $data['component_appid']    = $this->appId;
+        $data['offset']             = 0;
+        $data['count']              = 500;
+        //$data['authorizer_appid']           = $authorizerAppid; //授权方appid
+        $res        = Query::posturl($url, $data);
+        return $res;
+    }
 }

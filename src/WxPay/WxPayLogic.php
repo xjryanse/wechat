@@ -41,13 +41,16 @@ class WxPayLogic
     public function getWxPayJsApiOrder( $outTradeNo, $money, $orderDescribe, $attach = '')
     {
         $appId                  = $this->wePubAppId;
-        $param['profit_sharing']= 'Y';  //Y-是，需要分账;N-否，不分账
+        $config                 = WxPayConfigs::getInstance( $appId );
+        $payInfo                = $config->getInfo();
+        //在wechat_wx_pay_config表，配置是否分账
+        $param['profit_sharing']=  $payInfo['profitSharing'] ? 'Y' : 'N';  //Y-是，需要分账;N-否，不分账
         $param['openid']        = $this->openid;
         $param['body']          = $orderDescribe;    //商品简单描述
         $param['attach']        = $attach; //附加数据，在查询API和支付通知中原样返回
         $param['out_trade_no']  = $outTradeNo; //商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|* 且在同一个商户号下唯一
         $param['total_fee']     = round( $money * 100, 2); //订单总金额，单位为分
-        $config                 = WxPayConfigs::getInstance( $appId );
+
         $wxPayJsApiOrder        = (new JsApiPay())->order( $param, $config );
         return $wxPayJsApiOrder;
     }

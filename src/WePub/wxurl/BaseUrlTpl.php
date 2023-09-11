@@ -61,5 +61,8 @@ class BaseUrlTpl
 
         //批量查询卡券列表              cardBatchget
         'cardBatchget'                      =>'https://api.weixin.qq.com/card/batchget?access_token=ACCESS_TOKEN',
+        //【发布能力】
+        //获取成功发布列表
+        'cgiBinFreepublishBatchGet'         =>'https://api.weixin.qq.com/cgi-bin/freepublish/batchget?access_token=ACCESS_TOKEN',
     ];
 }

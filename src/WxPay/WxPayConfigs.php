@@ -4,6 +4,7 @@ namespace xjryanse\wechat\WxPay;
 use xjryanse\wechat\service\WechatWxPayConfigService;
 use xjryanse\wechat\WxPay\base\WxPayConfigInterface;
 use xjryanse\logic\Debug;
+use xjryanse\logic\Strings;
 use Exception;
 /*
  * 微信支付配置信息
@@ -25,9 +26,10 @@ class WxPayConfigs extends WxPayConfigInterface
         if( $this->info ){
             return $this->info;
         }
-
-        $this->info = WechatWxPayConfigService::getInstance( $this->uuid )->get();
-        if( !$this->info ){
+        //20220903:优化
+        if(Strings::isSnowId($this->uuid)){
+            $this->info = WechatWxPayConfigService::getInstance( $this->uuid )->get();
+        } else {
             $this->info = WechatWxPayConfigService::getByAppId( $this->uuid );
         }
         if(!$this->info){
@@ -124,6 +126,15 @@ class WxPayConfigs extends WxPayConfigInterface
     {
         $info = $this->getInfo();
         return $info ? $info["Key"] : '' ;
+    }
+    /**
+     * 20221002:v3接口key
+     * @return type
+     */
+    public function GetV3Key()
+    {
+        $info = $this->getInfo();
+        return $info ? $info['v3Key'] : '' ;
     }
     
     public function GetAppSecret()

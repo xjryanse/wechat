@@ -11,11 +11,19 @@ namespace xjryanse\wechat;
 
 use xjryanse\wechat\WeApp\CustomMsg;
 use xjryanse\wechat\WeApp\QRCode;
-use xjryanse\wechat\WeApp\SessionKey;
+// use xjryanse\wechat\WeApp\SessionKey;
 use xjryanse\wechat\WeApp\Statistic;
 use xjryanse\wechat\WeApp\TemplateMsg;
 use xjryanse\wechat\WeApp\SubscribeMsg;
+use xjryanse\wechat\service\WechatWeAppService;
+use xjryanse\wechat\service\WechatWeOpenAuthorizeService;
+use xjryanse\wechat\WeOpen\WeAppLogin;
+use xjryanse\wechat\WeOpenApi;
 use xjryanse\xcache\Cache;
+use xjryanse\logic\Debug;
+// 20230616:开始优化重写
+use xjryanse\wechat\WeApp\AppUser;
+
 
 class WeApp {
 
@@ -35,10 +43,28 @@ class WeApp {
      * @return array sessionkey相关数组
      */
     public function getSessionKey($code) {
-        if (!isset($this->instance['sessionkey'])) {
-            $this->instance['sessionkey'] = new SessionKey($this->appid, $this->secret);
+        if(!$this->secret){
+            //20220301 尝试提取开放平台的授权信息
+            /*
+            $weOpenId = WechatWeOpenAuthorizeService::authorizerAppidGetWeOpenId($this->appid);
+            WeAppLogin::getInstance($weOpenId)->setAuthAppId( $this->appid );
+            $res = WeAppLogin::getInstance( $weOpenId )->getSessionKey($code);
+             */
+            // 20221020 ;
+            $res = WeOpenApi::getSessionKey($this->appid, $code);
+        } else {
+            //原逻辑，使用密钥获取登录小程序
+            // if (!isset($this->instance['sessionkey'])) {
+            //    $this->instance['sessionkey'] = new SessionKey($this->appid, $this->secret);
+            // }
+            // $res = $this->instance['sessionkey']->get($code);
+
+            // 20230616：优化重写，并测试成功
+            $weAppId = WechatWeAppService::appIdToId($this->appid);
+            $res = AppUser::getInstance($weAppId)->sessionKey($code);
         }
-        return $this->instance['sessionkey']->get($code);
+
+        return $res;
     }
 
     /**

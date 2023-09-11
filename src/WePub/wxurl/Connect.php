@@ -1,7 +1,10 @@
 <?php
 namespace xjryanse\wechat\WePub\wxurl;
+
 use xjryanse\logic\Url;
 use think\facade\Request;
+use xjryanse\logic\Debug;
+use xjryanse\system\logic\ConfigLogic;
 
 class Connect extends Base
 {
@@ -24,10 +27,21 @@ class Connect extends Base
         $respp = explode('?',$this->redirectUri);
         //有参数，取参数，无参数，放空
         $params = isset($respp[1]) ? equalsToKeyValue($respp[1]):[];
-        $this->redirectUri = urlencode(Url::addParam($this->redirectUri, array_merge($params,['sessionid'=> session_id()])));
-        //本地真香调试【20210609】
-        if(in_array(Request::ip(),['127.0.0.1','::1'])){
-            $this->redirectUri = 'http://tenancy.xiesemi.cn/wechat/we_pub/local?backUrl='.urlencode($this->redirectUri);    
+        $params['sessionid'] = session_id();
+        if(Debug::isDebug()){
+            $params['debug'] = 'xjryanse';
+            dump('Request::domain()');
+            dump(Request::host());
+        }
+        
+        $this->redirectUri = urlencode(Url::addParam($this->redirectUri, $params));
+        //本地真香调试【20210609】TODO
+        // 配置的域名数组
+        // if(in_array(Request::ip(),['127.0.0.1','::1']) || in_array(Request::host(),['jksh.xiesemi.cn','xywxtest.xiesemi.cn']) ){
+        // 20230723:微信授权是否走代理
+        if(in_array(Request::ip(),['127.0.0.1','::1']) || ConfigLogic::config('isWxAuthProxy')){
+            $wxRedirectBaseUrl = $this->getWxRedirectBaseUrl();
+            $this->redirectUri = $wxRedirectBaseUrl.'/wechat/we_pub/local?backUrl='.urlencode($this->redirectUri); 
         }
         
         //把当前会话的sessionid放到链接中，便于微信回调时识别
@@ -39,7 +53,7 @@ class Connect extends Base
         if($scope){
             $url = str_replace( "=SCOPE",        '='.$scope,       $url);
         }
-        
+
         return $this->replace( $url );
     }
 }

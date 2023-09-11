@@ -10,10 +10,9 @@ use xjryanse\wechat\WePub\wxurl\Connect;
 use xjryanse\wechat\WePub\wxurl\Datacube;
 use xjryanse\wechat\WePub\wxurl\Sns;
 use xjryanse\wechat\WePub\wxurl\Card;
+use xjryanse\system\logic\ConfigLogic;
 use xjryanse\curl\Query;
 use xjryanse\logic\Arrays;
-use xjryanse\logic\Cachex;
-use think\facade\Request;
 use think\facade\Cache;
 use xjryanse\logic\Debug;
 use Exception;
@@ -28,7 +27,7 @@ class Fans
     protected $openid;
     public    $wxUrl;
     
-    public function __construct(int $acid = 2,string $openid='')
+    public function __construct($acid = 2,$openid='')
     {
         $this->acid     = $acid;
         $this->openid   = $openid;
@@ -36,9 +35,11 @@ class Fans
         if(!$app){
             echo json_encode(['code' => '1',"msg"=>'公众号不存在[xjryanse\wechat\WePub]']); exit;
         }
-        $this->appId        = $app->appid;
-        $this->appSecret    = $app->secret;
-        
+        $this->appId        = $app['appid'];
+        $this->appSecret    = $app['secret'];
+        Debug::debug('$this->appId',$this->appId);
+        Debug::debug('$this->appSecret',$this->appSecret);
+
         $this->wxUrl['CgiBin']      = new CgiBin( $this->appId, $this->appSecret,$this->accessToken );
         $this->wxUrl['Connect']     = new Connect( $this->appId, $this->appSecret,$this->accessToken );
         $this->wxUrl['Datacube']    = new Datacube( $this->appId, $this->appSecret,$this->accessToken );
@@ -74,16 +75,26 @@ class Fans
     public function getUserInfo()
     {
         $fansInfo = $this->getUserInfoFromDb( $this->openid, $this->acid);
-        if(!$fansInfo){
+        Debug::debug('FansInfoOpenid',$this->openid);
+        Debug::debug('DbFansInfo',$fansInfo);
+        //20220204主动拉取接口不再返回昵称信息，增加昵称判断，如无昵称，由用户授权获取
+        if(!$fansInfo || !$fansInfo['nickname']){
             //从微信服务器获取用户信息
             $userInfoUrl    = $this->wxUrl['Sns']->userInfo( $this->openid, $this->token );
             $res            = Query::geturl($userInfoUrl);
+            //dump($res);exit;
             //方便调试
             $res['url']     = $userInfoUrl;
             $res['token']   = $this->token;
             $res['acid']    = $this->acid;
             //有openid，保存返回，没有，返回空
-            $fansInfo       = Arrays::value($res,'openid') ? WechatWePubFansService::save($res) : [];
+            if(!$fansInfo){
+                //新增
+                $fansInfo       = Arrays::value($res,'openid') ? WechatWePubFansService::save($res) : [];
+            } else {
+                WechatWePubFansService::getInstance($fansInfo['id'])->update($res);
+                $fansInfo = array_merge($fansInfo,$res);
+            }
         }
         return $fansInfo;
     }
@@ -105,7 +116,6 @@ class Fans
         }
         return $data;
     }
-    
     /**
      * TODO修改开发者获取用户信息
      */
@@ -120,52 +130,80 @@ class Fans
      * @param type $data    微信规定的数据格式  https://developers.weixin.qq.com/doc/offiaccount/User_Management/Get_users_basic_information_UnionID.html#UinonId
      * @return type
      */
-    public function cgiBinUserInfoBatchget( $data  )
+    public function cgiBinUserInfoBatchget( $data )
     {
         $userInfoUrl    = $this->wxUrl['CgiBin']->userInfoBatchget();
         $res            = Query::posturl($userInfoUrl,$data);
-        if(isset( $res['user_info_list'])){
-            foreach( $res['user_info_list'] as &$v){
-                //循环存入数据库
-                WechatWePubFansService::updateInfo( $v );
-            }
+        Debug::debug('cgiBinUserInfoBatchget的$res',$res);
+        if(!isset( $res['user_info_list'])){
+            return $res;
+        }
+        //批量更新用户
+        foreach( $res['user_info_list'] as &$v){
+            //循环存入数据库
+            //2021年12月27日之后，不再输出头像、昵称信息。
+            $v = Arrays::unsetEmpty($v);
+            // 20220911:增加同步时间戳
+            $v['sync_timestamp'] = time();
+            WechatWePubFansService::updateInfo( $v );
         }
         
         return $res;
     }
+    /**
+     * accessToken对象数组
+     */
+    public function getAccessTokenArr(){
+        $wePubAccessTokenUrl = ConfigLogic::config('wePubAccessTokenUrl'); 
+        Debug::debug('$wePubAccessTokenUrl',$wePubAccessTokenUrl);
+        if($wePubAccessTokenUrl){
+            $res            = Query::geturl( $wePubAccessTokenUrl);
+            $accessToken    = $res['data'];
+        } else {
+            $cacheKey   = 'WUwechatAccessToken'.$this->acid;
+            $accessToken = Cache::get( $cacheKey );
+            Debug::debug('缓存中的$accessToken',$accessToken);
+            // 无$accessToken，或10分钟后即将过期。
+            if(!$accessToken || ! $accessToken['access_token'] || (strtotime($accessToken['expires_time']) - time() < 600)){
+                //从微信服务器获取accessToken
+                $accessTokenUrl = $this->wxUrl['CgiBin']->token();
+                $res            = Query::geturl( $accessTokenUrl);
+                Debug::debug('$accessTokenUrl',$accessTokenUrl);
+                Debug::debug('$accessTokenUrl的$res',$res);
+                if( isset($res['errmsg'])){
+                    throw new Exception( $res['errmsg'],$res['errcode']);
+                }
+                $res['acid']    = $this->acid;
+                $res['expires_time']    = date('Y-m-d H:i:s',time() + $res['expires_in']);
+                // 2022-11-13:增加7000秒过期
+                Cache::set( $cacheKey ,$res ,7000);
+                $accessToken = $res;
+            }
+        }
+
+        return $accessToken;
+    }
     
     /**
-     * 获取公众号accesstoken
+     * 获取公众号accesstoken;
+     * public 方法，用于对外部其他系统提供，确保accessToken唯一
      * @return type
      */
-    private function getAccessToken()
+    public function getAccessToken()
     {
-//        $accessToken = $this->getAccessTokenFromDb( $this->acid);
-        $cacheKey   = 'WUwechatAccessToken'.$this->acid;
-        $accessToken = Cache::get( $cacheKey );
-        if(!$accessToken || ! $accessToken['access_token'] || strtotime($accessToken['expires_time']) < time()){
-            //从微信服务器获取accessToken
-            $accessTokenUrl = $this->wxUrl['CgiBin']->token();
-            $res            = Query::geturl( $accessTokenUrl);
-//            dump($accessTokenUrl);
-//            dump($res);
-            if( isset($res['errmsg'])){
-                throw new Exception( $res['errmsg'],$res['errcode']);
-            }
-            $res['acid']    = $this->acid;
-            $res['expires_time']    = date('Y-m-d H:i:s',time() + $res['expires_in']);
+        // 20230308：逻辑拆分
+        $accessToken = $this->getAccessTokenArr();
 
-            Cache::set( $cacheKey ,$res );
-            $accessToken = $res;
-        }
-        
         $this->accessToken = $accessToken['access_token'];
         //全局设一下
+
         $this->wxUrl['CgiBin']  ->setAccessToken( $accessToken['access_token'] );
         $this->wxUrl['Connect'] ->setAccessToken( $accessToken['access_token'] );
         $this->wxUrl['Datacube']->setAccessToken( $accessToken['access_token'] );
         $this->wxUrl['Sns']     ->setAccessToken( $accessToken['access_token'] );
         $this->wxUrl['Card']     ->setAccessToken( $accessToken['access_token'] );
+
+        return $this->accessToken;
     }
     /**
      * 获取公众号accesstoken
@@ -231,15 +269,7 @@ class Fans
     
     private static function getUserInfoFromDb($openid,$acid)
     {
-        $key = 'Fans_getUserInfoFromDb_'.$openid.'_'.$acid;
-        $fansInfo = Cachex::funcGet($key, function() use ($openid,$acid){
-            return WechatWePubFansService::mainModel()->where('acid',$acid)
-                    ->where('openid',$openid)
-                    ->order('id desc')
-                    ->cache(300)
-                    ->find();
-        });
-        return $fansInfo;
+        return WechatWePubFansService::getFansInfoCache($openid);
     }
     /*
     private static function getAccessTokenFromDb( $acid )
