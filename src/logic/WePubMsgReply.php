@@ -8,11 +8,12 @@ use xjryanse\wechat\service\WechatWeMsgRespRuleService;
 use xjryanse\wechat\service\WechatWePubFansService;
 use xjryanse\system\service\SystemCompanyService;
 use xjryanse\system\service\SystemCompanyAbilityService;
+use xjryanse\wechat\service\WechatWePubQrSceneService;
 use app\system\wxTemplateMsg\WWePub;
 use think\facade\Cache;
 use xjryanse\logic\Arrays;
 use xjryanse\logic\Strings;
-
+use xjryanse\logic\DbOperate;
 /**
  * 公众号消息回复
  */
@@ -31,7 +32,16 @@ class WePubMsgReply {
         if($dataArr['Event'] == 'TEMPLATESENDJOBFINISH'){
             return '';
         }
-        WechatWeMsgLogService::save($dataArr);
+        if($dataArr['Event'] == 'subscribe' || $dataArr['Event'] == 'SCAN'){
+            
+            $sceneId = Arrays::value($dataArr, 'EventKey');
+            $dataArr['label'] = WechatWePubQrSceneService::getInstance($sceneId)->fLabel();
+        }
+        
+        // 20240612
+        // $dataArr['reamrk'] = $message;
+        WechatWeMsgLogService::saveRam($dataArr);
+        DbOperate::dealGlobal();
         Cache::set('WePubMsgReply$dataArr',$dataArr);
         
         //自动回复规则是否命中
@@ -40,15 +50,15 @@ class WePubMsgReply {
         $sessionFrom    = $dataArr['SessionFrom'];
         $fromUserName   = $dataArr['FromUserName'];
         $toUserName     = $dataArr['ToUserName'];
-        
+        // 【步骤1】调用特殊代码逻辑
         $funcName = 'event'. ucfirst(strtolower($event));
         // 调用相应的事件处理逻辑
         if(method_exists(__CLASS__,$funcName)){
             call_user_func([ __CLASS__ , $funcName],$dataArr);
         }
-
+        //【步骤2】调用通用代码逻辑
         //$keyword = "";
-        $response       = WechatWeMsgRespRuleService::getResponse($msgType, $event, $sessionFrom, $dataArr['Content']);
+        $response       = WechatWeMsgRespRuleService::getResponse($msgType, $event, $sessionFrom, $dataArr);
         Cache::set('WePubMsgReplyResponse',$response);
         $respStr = '';
         if( $response){
@@ -62,7 +72,8 @@ class WePubMsgReply {
         if($respStr){
             //保存返回的消息
             $xmlMessage->setMessage( $respStr );
-            WechatWeMsgLogService::save($xmlMessage->getMessage());            
+            WechatWeMsgLogService::saveRam($xmlMessage->getMessage());            
+            DbOperate::dealGlobal();
         }
 
         return $respStr;

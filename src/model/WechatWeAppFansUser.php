@@ -11,13 +11,12 @@ class WechatWeAppFansUser extends Base
     public static $uniFields = [
         [
             'field'     =>'user_id',
+            // 去除prefix的表名
             'uni_name'  =>'user',
             'uni_field' =>'id',
-            'in_list'   => false,
-            'in_statics'=> false,
-            'in_exist'  => true,
             'del_check' => false,
-        ],
+            'del_msg'   => '该用户有绑定小程序信息'
+        ]
     ];
 
 }

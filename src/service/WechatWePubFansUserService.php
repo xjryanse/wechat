@@ -6,6 +6,8 @@ use xjryanse\system\interfaces\MainModelInterface;
 use xjryanse\user\service\UserService;
 use xjryanse\logic\Debug;
 use xjryanse\logic\Arrays;
+use xjryanse\logic\Arrays2d;
+
 
 /**
  * 微信公众号粉丝用户绑定
@@ -14,7 +16,12 @@ class WechatWePubFansUserService implements MainModelInterface {
 
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelRamTrait;
+    use \xjryanse\traits\MainModelCacheTrait;
+    use \xjryanse\traits\MainModelCheckTrait;
+    use \xjryanse\traits\MainModelGroupTrait;
     use \xjryanse\traits\MainModelQueryTrait;
+
 
     protected static $mainModel;
     protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWePubFansUser';
@@ -187,6 +194,38 @@ class WechatWePubFansUserService implements MainModelInterface {
             }
         }
         return $res;
+    }
+	
+	/**
+     * 获取当前的账号：当有多个没有指定is_current时，返回false,表示获取失败
+     * 20231210
+     */
+    public static function getCurrent($openid){
+        $con = [];
+        $con[] = ['openid','=',$openid];
+        $lists = self::mainModel()->where($con)->select();
+
+        $arr = $lists ? $lists->toArray() : [];
+        if(!$arr){
+            return false;
+        }
+        if(count($arr) == 1){
+            return $arr[0];
+        }
+        
+        // 提取当前,没有的话会返回空数组，性质一样
+        $con[] = ['is_current','=',1];
+        return Arrays2d::listFind($arr, $con);
+    }
+    /*
+     * 20231210：设为当前端口
+     */
+    public function setCurrent(){
+        $info = $this->get();
+        $con = [];
+        $con[] = ['openid','=',$info['openid']];
+        self::mainModel()->where($con)->update(['is_current'=>0]);
+        return $this->updateRam(['is_current'=>1]);
     }
 
 }

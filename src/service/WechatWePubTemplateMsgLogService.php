@@ -7,6 +7,8 @@ use xjryanse\logic\Debug;
 use xjryanse\logic\DbOperate;
 use xjryanse\logic\Arrays;
 use xjryanse\wechat\service\WechatWePubFansService;
+use xjryanse\wechat\WePub\TemplateMsg;
+use xjryanse\system\service\SystemCompanyService;
 
 /**
  * 模板消息发送记录
@@ -15,13 +17,27 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface {
 
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelRamTrait;
+    use \xjryanse\traits\MainModelCacheTrait;
+    use \xjryanse\traits\MainModelCheckTrait;
+    use \xjryanse\traits\MainModelGroupTrait;
     use \xjryanse\traits\MainModelQueryTrait;
+
+    use \xjryanse\traits\ObjectAttrTrait;
     use \xjryanse\traits\RedisModelTrait;
 
     protected static $mainModel;
     protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWePubTemplateMsgLog';
     //直接执行后续触发动作
     protected static $directAfter = true;
+    
+    use \xjryanse\wechat\service\wePubTemplateMsgLog\DoTraits;
+    
+    public static function extraDetails($ids) {
+        return self::commExtraDetails($ids, function($lists) use ($ids) {
+                    return $lists;
+                },true);
+    }
 
     //2023-01-08：
     public static function extraAfterSave(&$data, $uuid) {
@@ -69,22 +85,6 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface {
         $data = self::mainModel()->where($con)->limit(50)->select();
         $dataArr = $data ? $data->toArray() : [];
         return array_column($dataArr, 'id');
-
-//        if(!self::redisHasTodoTime()){
-//            // 没有则从数据库取
-//            $con[] = ['send_status','=',XJRYANSE_OP_TODO];
-//            $con[] = ['create_time','>=',date('Y-m-d H:i:s',time() - $withinSecond)];
-//            Debug::debug('$todoListIds 的 $con',$con);
-//            $data = self::mainModel()->where( $con )->select();
-//            $dataArr = $data ? $data->toArray() : [];
-//            self::redisTodoAddBatch($dataArr);
-//        }
-//        // 20230415：调整从redis 取数据
-//        $todoList = self::redisTodoList();
-//        Debug::debug('redis 提取的 $todoList', $todoList);
-//        $ids = array_column($todoList, 'id');
-//
-//        return $ids;
     }
 
     /**
@@ -164,5 +164,62 @@ class WechatWePubTemplateMsgLogService implements MainModelInterface {
 
         return $res;
     }
+    /*
+     * 20240115：单条
+     */
+    public static function templateMsgMatchAddTodo($fWePubId, $templateKey, $openids, $infoRaw, $fromTable='', $fromTableId=''){
+        $tmp['openids']     = $openids;
+        $tmp['info']        = $infoRaw;
+        $tmp['fromTable']   = $fromTable;
+        $tmp['fromTableId'] = $fromTableId;
+        $dataArr            = [$tmp];
+        return self::templateMsgMatchBatchAddTodo($fWePubId, $templateKey, $dataArr);
+    }
 
+    /**
+     * 20220601:批量匹配
+     * 模板消息匹配[批量]，并结果添加到待发送列表
+     * @param type $fWePubId
+     * @param type $templateKey 模板消息key
+     * @param type $dataArr     信息数组Arr，包含字段：openids,info,fromTable,fromTableId
+     */
+    public static function templateMsgMatchBatchAddTodo($fWePubId, $templateKey, $dataArr ){
+        $dataSaveArr = [];
+        foreach($dataArr as &$v){
+            $openids        = Arrays::value($v, 'openids',[]);
+            $infoRaw        = Arrays::value($v, 'info',[]);
+            $info           = self::addCommParam($infoRaw);
+            $res            = TemplateMsg::matchAll($templateKey, $openids, $info );
+            foreach($res as $messageData){
+                $message                    = $messageData['sendData'];
+                $tmpData                    = [];
+                $tmpData['id']              = Arrays::value($messageData, 'msgLogId') ? : WechatWePubTemplateMsgLogService::mainModel()->newId();
+                $tmpData['acid']            = $fWePubId;
+                $tmpData['template_key']    = $templateKey;
+                $tmpData['template_id']     = Arrays::value( $message, 'template_id');
+                $tmpData['openid']          = Arrays::value( $message, 'touser');
+                $tmpData['from_table']      = Arrays::value($v, 'fromTable','');
+                $tmpData['from_table_id']   = Arrays::value($v, 'fromTableId','');
+                $tmpData['message']         = json_encode($message,JSON_UNESCAPED_UNICODE);
+                $tmpData['send_status']     = XJRYANSE_OP_TODO;
+                $dataSaveArr[] = $tmpData;
+            }
+        }
+        //一次性批量写入
+        return self::saveAll($dataSaveArr);
+    }
+    /**
+     * 20230503：添加通用参数
+     */
+    protected static function addCommParam($info ){
+        // 20230524：发送异常消息，需要外部传参comKey
+        if(!Arrays::value($info, 'comKey')){
+            $companyId  = Arrays::value($info, 'company_id') ? $info['company_id']: session(SESSION_COMPANY_ID);
+            $comKey     = SystemCompanyService::getInstance($companyId)->getKey();
+            $info['comKey'] = $comKey;
+        }
+        return $info;
+    }
+    
+    
 }

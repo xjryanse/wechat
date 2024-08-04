@@ -33,5 +33,16 @@ class WechatWePubTemplateMsgLog extends Base
             'uni_name'  =>'finance_statement',
             'uni_field' =>'id',
         ],
+        /*
+         * 20231019：性能渣渣
+        [
+            'field'     =>'user_id',
+            // 去除prefix的表名
+            'uni_name'  =>'user',
+            'uni_field' =>'id',
+            'in_exist'  => true,
+            'in_statics'  => false,
+        ],
+         */
     ];
 }

@@ -7,7 +7,7 @@ use xjryanse\logic\Arrays;
 use xjryanse\system\logic\FileLogic;
 use xjryanse\user\service\UserService;
 use xjryanse\order\service\OrderService;
-
+use Exception;
 /**
  * 微信小程序粉丝用户绑定
  */
@@ -15,7 +15,12 @@ class WechatWeAppFansUserService implements MainModelInterface {
 
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelRamTrait;
+    use \xjryanse\traits\MainModelCacheTrait;
+    use \xjryanse\traits\MainModelCheckTrait;
+    use \xjryanse\traits\MainModelGroupTrait;
     use \xjryanse\traits\MainModelQueryTrait;
+
     use \xjryanse\traits\ObjectAttrTrait;
 
     protected static $mainModel;
@@ -185,13 +190,16 @@ class WechatWeAppFansUserService implements MainModelInterface {
         if (!$fansInfo) {
             throw new Exception('小程序用户' . $info['openid'] . '不存在');
         }
-        if (!$fansInfo['phone']) {
-            throw new Exception('小程序用户' . $info['openid'] . '未认证手机号码');
+        if($fansInfo['phone']){
+            $data['id']         = $info['user_id'];
+            $data['phone']      = $fansInfo['phone'];
+            $data['username']   = $fansInfo['phone'];
+            return UserService::save($data);
+        } else {
+            $data['id']         = $info['user_id'];
+            $data['username']   = $fansInfo['openid'];
+            return UserService::save($data);
         }
-        $data['id'] = $info['user_id'];
-        $data['phone'] = $fansInfo['phone'];
-        $data['username'] = $fansInfo['phone'];
-        return UserService::save($data);
     }
 
 }

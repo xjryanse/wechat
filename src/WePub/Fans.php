@@ -45,8 +45,9 @@ class Fans
         $this->wxUrl['Datacube']    = new Datacube( $this->appId, $this->appSecret,$this->accessToken );
         $this->wxUrl['Sns']         = new Sns( $this->appId, $this->appSecret,$this->accessToken );
         $this->wxUrl['Card']         = new Card( $this->appId, $this->appSecret,$this->accessToken );
-        
+
         $this->getOauthAccessToken();
+        // 20230919：检测到性能问题
         $this->getAccessToken();
     }
 
@@ -157,6 +158,8 @@ class Fans
         $wePubAccessTokenUrl = ConfigLogic::config('wePubAccessTokenUrl'); 
         Debug::debug('$wePubAccessTokenUrl',$wePubAccessTokenUrl);
         if($wePubAccessTokenUrl){
+            // 20230919：检测到性能问题
+            // https://axsl.xiesemi.cn/wechat/we_pub_serv/accessTokenArr?acid=5215083856981180416
             $res            = Query::geturl( $wePubAccessTokenUrl);
             $accessToken    = $res['data'];
         } else {

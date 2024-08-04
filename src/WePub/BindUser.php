@@ -43,13 +43,13 @@ class BindUser
             if( $phone ){
                 $cone = [];
                 $cone[]      = ['phone','=',$phone];
-                $userInfo   = UserService::find( $cone );
+                $userInfo   = UserService::find( $cone ,0);
             }
             //【再openid取】
             if( !$userInfo ){
                 $cond = [];
                 $cond[]      = ['username','=',$openid];
-                $userInfo   = UserService::find( $cond );
+                $userInfo   = UserService::where( $cond)->find();
             }
             //【手机号码和openid都没找到，创建】
             if( !$userInfo ){

@@ -6,6 +6,7 @@ use xjryanse\wechat\logic\XmlRespTemplate;
 use xjryanse\wechat\service\WechatWeMsgLogService;
 use xjryanse\wechat\service\WechatWeMsgRespRuleService;
 use xjryanse\system\service\SystemCompanyService;
+use xjryanse\logic\DbOperate;
 use think\facade\Cache;
 
 /**
@@ -22,7 +23,8 @@ class WeAppMsgReply {
         $xmlMessage = XmlMessage::getInstance();
         $xmlMessage->setMessage( $message );
         $dataArr = $xmlMessage->getMessage();
-        WechatWeMsgLogService::save($dataArr);
+        WechatWeMsgLogService::saveRam($dataArr);
+        DbOperate::dealGlobal();
         Cache::set('WeAppMsgReply$dataArr',$dataArr);
         
         //自动回复规则是否命中
@@ -50,7 +52,8 @@ class WeAppMsgReply {
         if($respStr){
             //保存返回的消息
             $xmlMessage->setMessage( $respStr );
-            WechatWeMsgLogService::save($xmlMessage->getMessage());            
+            WechatWeMsgLogService::saveRam($xmlMessage->getMessage());            
+            DbOperate::dealGlobal();
         }
 
         return $respStr;

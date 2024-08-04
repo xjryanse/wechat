@@ -3,7 +3,7 @@ namespace xjryanse\wechat\WxPay\v2;
 
 use xjryanse\logic\Debug;
 use xjryanse\logic\Strings;
-use xjryanse\wechat\model\WechatWxPayConfig;
+// use xjryanse\wechat\model\WechatWxPayConfig;
 use Exception;
 /**
  * 
@@ -23,7 +23,7 @@ abstract class Base {
      * 设置支付参数
      * @param WechatWxPayConfig $config
      */
-    public function setConf(WechatWxPayConfig $config){
+    public function setConf($config){
         $this->payConf = $config;
     }
     /**
@@ -302,6 +302,7 @@ abstract class Base {
         $resArr = $this->fromXml($xml);
         Debug::debug('调试打印【微信支付】返回对象', $resArr);
         //失败则直接返回失败
+        /*
         if ($resArr['return_code'] != 'SUCCESS') {
             foreach ($resArr as $key => $value) {
                 #除了return_code和return_msg之外其他的参数存在，则报错
@@ -310,6 +311,7 @@ abstract class Base {
                 }
             }
         }
+         */
         // 20221119：忽略了校验环节
         return $resArr;
     }

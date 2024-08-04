@@ -3,6 +3,7 @@
 namespace xjryanse\wechat\service;
 
 use xjryanse\system\interfaces\MainModelInterface;
+use xjryanse\system\service\SystemCompanyService;
 use xjryanse\logic\Cachex;
 use xjryanse\logic\Arrays;
 
@@ -13,14 +14,22 @@ class WechatWePubService implements MainModelInterface {
 
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelRamTrait;
+    use \xjryanse\traits\MainModelCacheTrait;
+    use \xjryanse\traits\MainModelCheckTrait;
+    use \xjryanse\traits\MainModelGroupTrait;
     use \xjryanse\traits\MainModelQueryTrait;
+
     use \xjryanse\traits\StaticModelTrait;
+    use \xjryanse\traits\ObjectAttrTrait;
 
     protected static $mainModel;
     protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWePub';
     //一经写入就不会改变的值
     protected static $fixedFields = ['company_id', 'appid', 'secret', 'token', 'encoding_aes_key'
         , 'logo', 'qrcode', 'wx_pay_id', 'creater', 'create_time'];
+    
+    use \xjryanse\wechat\service\wePub\FieldTraits;
 
     public static function extraDetails($ids) {
         return self::commExtraDetails($ids, function($lists) use ($ids) {
@@ -61,7 +70,11 @@ class WechatWePubService implements MainModelInterface {
      * 20221012：公司端口获取
      */
     public static function companyGet() {
-        $info = self::where()->find();
+        $companyId      = session(SESSION_COMPANY_ID);
+        $companyInfo    = SystemCompanyService::getInstance($companyId)->get();
+        $wePubId        = Arrays::value($companyInfo, 'we_pub_id');
+
+        $info = self::getInstance($wePubId)->get();
         return $info;
     }
 

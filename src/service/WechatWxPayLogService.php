@@ -25,7 +25,12 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
 
     use \xjryanse\traits\InstTrait;
     use \xjryanse\traits\MainModelTrait;
+    use \xjryanse\traits\MainModelRamTrait;
+    use \xjryanse\traits\MainModelCacheTrait;
+    use \xjryanse\traits\MainModelCheckTrait;
+    use \xjryanse\traits\MainModelGroupTrait;
     use \xjryanse\traits\MainModelQueryTrait;
+
     use \xjryanse\traits\ObjectAttrTrait;
 
     protected static $mainModel;
@@ -209,6 +214,9 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
         // TODO:实例类对象如何缓存？？
         $con[] = ['company_id', '=', $statement['company_id']];
         $config = WechatWxPayConfigService::mainModel()->where($con)->find();
+        if(!$config){
+            return false;
+        }
         $inst = new WxPayApiXie();
         $inst->setConf($config);
         $res = $inst->orderQuery($statement);
