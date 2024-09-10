@@ -165,10 +165,10 @@ class WechatWeAppFansUserService implements MainModelInterface {
         $wePubBindUserId = WechatWePubFansUserService::getUserIdByOpenid($wePubFansOpenid);
         if ($wePubFansOpenid && $wePubBindUserId) {
             //将小程序和公众号绑定为同一个用户
-            $bindData = [];
-            $bindData['acid'] = $weAppFans['acid'];
+            $bindData           = [];
+            $bindData['acid']   = $weAppFans['acid'];
             $bindData['openid'] = $openid;
-            $bindData['scene'] = $scene;
+            $bindData['scene']  = $scene;
             $bindData['user_id'] = $wePubBindUserId;
             $resp = self::save($bindData);
             return $resp['user_id'];

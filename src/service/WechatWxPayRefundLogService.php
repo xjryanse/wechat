@@ -30,6 +30,8 @@ class WechatWxPayRefundLogService implements MainModelInterface {
     //直接执行后续触发动作
     protected static $directAfter = true;
 
+    use \xjryanse\wechat\service\wxPayRefundLog\WxTraits;
+
     public static function extraDetails($ids) {
         return self::commExtraDetails($ids, function($lists) use ($ids) {
                     return $lists;

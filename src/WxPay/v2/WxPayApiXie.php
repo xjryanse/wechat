@@ -62,6 +62,30 @@ class WxPayApiXie extends Base {
         return $result;
     }
     /**
+     * 20240906：以退款单查询退款信息
+     * @param type $statement
+     * @param type $timeOut
+     * @return type
+     */
+    public function refundQueryByRefundStatement($statement, $timeOut = 6) {
+        $url = "https://api.mch.weixin.qq.com/pay/refundquery";
+        //检测必填参数
+        $this->values['appid']          = $this->payConf['AppId'];
+        $this->values['mch_id']         = $this->payConf['MerchantId'];
+        $this->values['out_refund_no']  = $statement['id'];
+        $this->values['nonce_str']      = self::getNonceStr();
+        $this->values['sign']           = self::makeSign();
+        $xml = $this->toXml();
+        // TODO接上报开启
+        // $startTimeStamp = self::getMillisecond(); //请求开始时间
+        $response       = $this->postXmlCurl( $xml, $url, false, $timeOut);
+        $result         = $this->resultInit($response);
+        // TODO需要再接入
+        // $this->reportCostTime($url, $startTimeStamp, $result); //上报请求花费时间
+
+        return $result;
+    }
+    /**
      * 下载交易账单
      */
     public function downloadBill($date){
@@ -84,4 +108,7 @@ class WxPayApiXie extends Base {
         // TODO需要再接入
         // $this->reportCostTime($url, $startTimeStamp, $result); //上报请求花费时间
     }
+    
+    
+    
 }

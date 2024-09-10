@@ -8,11 +8,12 @@ use xjryanse\system\interfaces\ThirdFinanceLogInterface;
 use xjryanse\finance\service\FinanceAccountLogService;
 use xjryanse\finance\service\FinanceAccountService;
 use xjryanse\finance\service\FinanceStatementService;
-use xjryanse\finance\service\FinanceIncomePayService;
-use xjryanse\system\service\SystemErrorLogService;
-use xjryanse\wechat\model\WechatWxPayLog;
-use xjryanse\wechat\WxPay\DealOrder;
+// use xjryanse\finance\service\FinanceIncomePayService;
+// use xjryanse\system\service\SystemErrorLogService;
+// use xjryanse\wechat\model\WechatWxPayLog;
+// use xjryanse\wechat\WxPay\DealOrder;
 use xjryanse\wechat\WxPay\v2\WxPayApiXie;
+// use xjryanse\logic\DbOperate;
 use xjryanse\logic\Arrays;
 use xjryanse\logic\Debug;
 use Exception;
@@ -37,6 +38,8 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
     protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWxPayLog';
     //直接执行后续触发动作
     protected static $directAfter = true;
+
+    use \xjryanse\wechat\service\wxPayLog\WxTraits;
 
     public static function extraDetails($ids) {
         return self::commExtraDetails($ids, function($lists) use ($ids) {
@@ -66,7 +69,8 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
                 if (Debug::isDebug()) {
                     throw $e;
                 }
-                SystemErrorLogService::exceptionLog($e);
+                // throw $e;
+                // SystemErrorLogService::exceptionLog($e);
                 self::checkNoTransaction();
             }
         }
@@ -81,7 +85,9 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
     public function deal() {
         self::checkTransaction();
         //拆解数据保存
-        $this->tearValData();
+        return $this->tearValData();
+        /*
+         * 20240909:发现是无用方法
         //处理订单财务数据
         $financeIncomePayId = DealOrder::dealOrderFinance($this->uuid);
         //处理流程节点数据
@@ -94,6 +100,7 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
             throw new Exception('未找到' . $statementId . '对应订单号信息');
         }
         return true;
+         */
     }
 
     /**
@@ -134,6 +141,9 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
      * @param type $uuid
      */
     public static function extraAfterSave(&$data, $uuid) {
+        /*
+         * 20240904:发现好像没啥用，注释
+         * 
         $result = Arrays::value($data, 'result_code');
         //状态S-交易成功；F-交易失败；A-等待授权；Z-交易未知；D-订单已撤销
         $info = self::getInstance($uuid)->get(0);
@@ -142,6 +152,8 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
             self::addFinanceAccountLog($info);
             Db::commit();
         }
+         * 
+         */
     }
 
     /*
@@ -149,27 +161,31 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
      */
 
     public static function addFinanceAccountLog($log) {
-        Debug::debug('addFinanceAccountLog::输入信息', $log);
-        $statementId = $log['statement_id'];
-        $statement = FinanceStatementService::getInstance($statementId)->get(0);
-        Debug::debug('addFinanceAccountLog::$statementId信息', $statementId);
-        Debug::debug('addFinanceAccountLog::$statement信息', $statement);
+        // Debug::debug('addFinanceAccountLog::输入信息', $log);
+        $statementId    = $log['statement_id'];
+        $statement      = FinanceStatementService::getInstance($statementId)->get(0);
+        // Debug::debug('addFinanceAccountLog::$statementId信息', $statementId);
+        // Debug::debug('addFinanceAccountLog::$statement信息', $statement);
         if (!$statementId || !$statement) {
             throw new Exception('账单不存在' . $statementId);
         }
 
-        $data['company_id'] = $log['company_id'];
-        $data['user_id'] = Arrays::value($statement, 'user_id');
-        $data['customer_id'] = Arrays::value($statement, 'customer_id');
-        $data['money'] = Arrays::value($statement, 'need_pay_prize');
-        $data['statement_id'] = $log['statement_id'];
-        $data['reason'] = Arrays::value($statement, 'statement_name');
-        $data['change_type'] = Arrays::value($statement, 'change_type');
-        $data['account_id'] = FinanceAccountService::getIdByAccountType($log['company_id'], 'wxMch');      //微信商户号
-        $data['from_table'] = self::mainModel()->getTable();
-        $data['from_table_id'] = $log['id'];
-        Debug::debug('addFinanceAccountLog::保存信息', $data);
+        $data['company_id']     = $log['company_id'];
+        $data['user_id']        = Arrays::value($statement, 'user_id');
+        $data['customer_id']    = Arrays::value($statement, 'customer_id');
+        $data['money']          = Arrays::value($statement, 'need_pay_prize');
+        $data['statement_id']   = $log['statement_id'];
+        $data['reason']         = Arrays::value($statement, 'statement_name');
+        $data['change_type']    = Arrays::value($statement, 'change_type');
+        $data['account_id']     = FinanceAccountService::getIdByAccountType($log['company_id'], 'wxMch');      //微信商户号
+        $data['from_table']     = self::mainModel()->getTable();
+        $data['from_table_id']  = $log['id'];
+        // Debug::debug('addFinanceAccountLog::保存信息', $data);
         return FinanceAccountLogService::save($data);
+        // 20240904：尝试改ram方法
+
+        // FinanceAccountLogService::saveRam($data);
+        // DbOperate::dealGlobal();
     }
 
     /**
@@ -203,23 +219,11 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
      * 查微信远程服务器数据
      */
     public static function payQueryRemote($statementId) {
+        // 20240906：调整为封装方法
+        $res = self::wxPayQuery($statementId);
+        // 20240906:TODO:主要是为了提company_id可以逐步弃用
         $statement = FinanceStatementService::getInstance($statementId)->get();
-        if (!$statement) {
-            throw new Exception('查单失败:账单不存在');
-        }
-        // 20230903：本地不查
-        if(Arrays::value($_SERVER, 'SERVER_NAME') == 'localhost'){
-            return false;
-        }
-        // TODO:实例类对象如何缓存？？
-        $con[] = ['company_id', '=', $statement['company_id']];
-        $config = WechatWxPayConfigService::mainModel()->where($con)->find();
-        if(!$config){
-            return false;
-        }
-        $inst = new WxPayApiXie();
-        $inst->setConf($config);
-        $res = $inst->orderQuery($statement);
+        
         if ($res['return_code'] == 'SUCCESS' && $res['result_code'] == 'SUCCESS') {
             if ($res['trade_state'] == 'NOTPAY') {
                 return false;
@@ -229,9 +233,12 @@ class WechatWxPayLogService implements MainModelInterface, ThirdFinanceLogInterf
             $res['company_id'] = $statement['company_id'];
             $resp = self::save($res);
             // 主动查单：处理订单数据；
+            /*
+             * 么有什么用
             Db::startTrans();
             DealOrder::dealOrderFinance($resp['id']);
             Db::commit();
+             */
             return $resp;
         } else {
             // 查单失败，返回失败

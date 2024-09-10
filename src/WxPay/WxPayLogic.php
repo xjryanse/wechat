@@ -9,7 +9,7 @@ use xjryanse\wechat\WxPay\sec\WxPaySecApi;
 use xjryanse\wechat\WxPay\sec\WxPaySecProfitSharing;    //单次分账
 use xjryanse\wechat\service\WechatWxPaySecService;
 use xjryanse\wechat\service\WechatWxPayRefundLogService;
-use xjryanse\finance\logic\FinanceRefundLogic;
+// use xjryanse\finance\logic\FinanceRefundLogic;
 use xjryanse\wechat\service\WechatWxPayLogService;
 use xjryanse\logic\Arrays;
 use xjryanse\logic\Debug;
@@ -87,6 +87,8 @@ class WxPayLogic
      * @param type $refundMoney 退款金额（元）
      * @return array
      */
+    /*
+     * 20240909：判定为弃用方法
     public static function paySnRefund( $paySn, $orderId , $refundMoney='')
     {
         //支付单号数组取支付记录列表
@@ -109,7 +111,7 @@ class WxPayLogic
         }
         return $resp;
     }
-    
+    */
     /**
      * 
      * @param type $param

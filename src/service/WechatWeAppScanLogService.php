@@ -18,7 +18,8 @@ class WechatWeAppScanLogService implements MainModelInterface {
     use \xjryanse\traits\MainModelCheckTrait;
     use \xjryanse\traits\MainModelGroupTrait;
     use \xjryanse\traits\MainModelQueryTrait;
-
+    // 20240907：增加redis异步
+    use \xjryanse\traits\RedisModelTrait;
 
     protected static $mainModel;
     protected static $mainModelClass = '\\xjryanse\\wechat\\model\\WechatWeAppScanLog';
@@ -36,7 +37,9 @@ class WechatWeAppScanLogService implements MainModelInterface {
         $data['openid'] = $openid;
         $data['user_id'] = session(SESSION_USER_ID);
         $data['ip'] = Request::ip();
-        return self::save($data);
+        
+        return self::redisLog($data);
+        // return self::save($data);
     }
 
     /**
